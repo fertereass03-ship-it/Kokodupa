@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Premium Shimmer Card Background -->
+    <path
+        android:pathData="M0,0h200v300h-200z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="200"
+                android:endY="300"
+                android:type="linear">
+                <item android:color="#262A38" android:offset="0.0" />
+                <item android:color="#1B1E2B" android:offset="0.5" />
+                <item android:color="#131520" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Subtle Diagonal Shimmer Glow -->
+    <path
+        android:pathData="M-50,0 L150,0 L250,300 L50,300 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="0"
+                android:startY="0"
+                android:endX="200"
+                android:endY="300"
+                android:type="linear">
+                <item android:color="#00FFFFFF" android:offset="0.0" />
+                <item android:color="#08FFFFFF" android:offset="0.5" />
+                <item android:color="#00FFFFFF" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Elegant Minimal Anime Art Frame Skeleton -->
+    <path
+        android:pathData="M84,136h32v28h-32z"
+        android:strokeColor="#18FFFFFF"
+        android:strokeWidth="1.5" />
+
+    <path
+        android:pathData="M88,158 L98,148 L106,155 L112,150 L116,158 Z"
+        android:fillColor="#15FFFFFF" />
+
+    <path
+        android:pathData="M108,142m-2,0a2,2 0,1 1,4 0a2,2 0,1 1,-4 0"
+        android:fillColor="#18FFFFFF" />
+</vector>

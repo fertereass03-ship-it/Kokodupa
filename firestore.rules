@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user owns the document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection:
+    // Any authenticated user can read public profile (e.g. for friends search)
+    // Only the owner can create or update their own profile document
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
+      allow delete: if false;
+
+      // User's private Favorites subcollection: strictly accessible by the owner
+      match /favorites/{favoriteId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+
+      // User's private Watch History subcollection: strictly accessible by the owner
+      match /watch_history/{historyId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+
+      // User's private Player Settings subcollection: strictly accessible by the owner
+      match /player_settings/{settingId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // User's private Friends subcollection: strictly accessible by the owner
+      match /friends/{friendId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+
+      // User's Messages subcollection: strictly accessible by the owner
+      match /messages/{messageId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+    }
+  }
+}

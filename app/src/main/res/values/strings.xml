@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ANIWERTI</string>
+    <string name="tab_home">Главное</string>
+    <string name="tab_catalog">Каталог</string>
+    <string name="tab_favorites">Избранное</string>
+    <string name="tab_friends">Друзья</string>
+    <string name="tab_profile">Профиль</string>
+</resources>

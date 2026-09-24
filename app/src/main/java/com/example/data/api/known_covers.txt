@@ -1,0 +1,99 @@
+        "39168" to "https://cdn.myanimelist.net/images/anime/1928/159811.jpg", // Девушки и танки: Финал. Часть 5
+        "58759" to "https://cdn.myanimelist.net/images/anime/1843/142785.jpg", // Michitas to Fumidasu Ippo
+        "59135" to "https://cdn.myanimelist.net/images/anime/1775/147330.jpg", // Я женился на однокласснице, которую ненавидел
+        "59144" to "https://cdn.myanimelist.net/images/anime/1683/146293.jpg", // Худшая работа «оценщика» оказалась самой сильной
+        "59193" to "https://cdn.myanimelist.net/images/anime/1527/158340.jpg", // Реинкарнация безработного: История о приключениях в другом мире 3
+        "59349" to "https://cdn.myanimelist.net/images/anime/1668/144352.jpg", // История о служащем, который стал одним из четырёх Небесных Царей, когда отправился в другой мир
+        "59415" to "https://cdn.myanimelist.net/images/anime/1465/153763.jpg", // Тёмная машина
+        "59443" to "https://cdn.myanimelist.net/images/anime/1064/155042.jpg", // Лепестки реинкарнации
+        "59711" to "https://cdn.myanimelist.net/images/anime/1834/151169.jpg", // Смертельная игра ради еды на столе
+        "59803" to "https://cdn.myanimelist.net/images/anime/1106/145433.jpg", // Дует осенний ветер
+        "59853" to "https://cdn.myanimelist.net/images/anime/1559/154695.jpg", // Тёмная луна: Кровавый алтарь
+        "59878" to "https://cdn.myanimelist.net/images/anime/1151/150084.jpg", // Жабры
+        "59978" to "https://cdn.myanimelist.net/images/anime/1921/154528.jpg", // Провожающая в последний путь Фрирен 2
+        "60028" to "https://cdn.myanimelist.net/images/anime/1229/155022.jpg", // Принцесса-рыцарь — невеста варвара
+        "60098" to "https://cdn.myanimelist.net/images/anime/1959/151055.jpg", // Моя геройская академия: Финал
+        "60223" to "https://cdn.myanimelist.net/images/anime/1194/153705.jpg", // Кае не страшно
+        "60310" to "https://cdn.myanimelist.net/images/anime/1434/154048.jpg", // Добро пожаловать в ад, Ирума! 4
+        "60371" to "https://cdn.myanimelist.net/images/anime/1140/154457.jpg", // Ты и я — полные противоположности
+        "60444" to "https://cdn.myanimelist.net/images/anime/1364/155774.jpg", // Учитель Ёваёва
+        "60460" to "https://cdn.myanimelist.net/images/anime/1151/152479.jpg", // Адский режим: Геймер, который любит спидран, становится бесподобным в параллельном мире с устаревшими настройками
+        "60541" to "https://cdn.myanimelist.net/images/anime/1315/146994.jpg", // Переворот военного движения 5
+        "60561" to "https://cdn.myanimelist.net/images/anime/1855/157453.jpg", // Ювенильная песня 4
+        "60587" to "https://cdn.myanimelist.net/images/anime/1151/149200.jpg", // Повелитель духов
+        "60636" to "https://cdn.myanimelist.net/images/anime/1275/158595.jpg", // Блич: Тысячелетняя кровавая война — Бедствие
+        "60669" to "https://cdn.myanimelist.net/images/anime/1553/147281.jpg", // Непутёвый ученик в школе магии: Поздравление с Новым две тысячи двадцать пятым годом
+        "61013" to "https://cdn.myanimelist.net/images/anime/1148/155671.jpg", // Даже копия способна влюбиться
+        "61014" to "https://cdn.myanimelist.net/images/anime/1459/155570.jpg", // Некий ITEM тёмной стороны
+        "61048" to "https://cdn.myanimelist.net/images/anime/1878/157796.jpg", // Кот и дракон
+        "61049" to "https://cdn.myanimelist.net/images/anime/1108/148086.jpg", // Перерождение мужчины средних лет в дочь дворянина: Мини
+        "61119" to "https://cdn.myanimelist.net/images/anime/1547/154126.jpg", // Мастера дуэлей: Пропавшие — Солнце забвения
+        "61128" to "https://cdn.myanimelist.net/images/anime/1486/153135.jpg", // Мастера на все руки выгнали из отряда героев
+        "61153" to "https://cdn.myanimelist.net/images/anime/1454/156338.jpg", // Переродившаяся великая святая скрывает, что она святая
+        "61169" to "https://cdn.myanimelist.net/images/anime/1965/158363.jpg", // Чёрный факел
+        "61192" to "https://cdn.myanimelist.net/images/anime/1109/154247.jpg", // Всё, что тебе нужно, — это убивать
+        "61323" to "https://cdn.myanimelist.net/images/anime/1036/159741.jpg", // Голубая шкатулка 2
+        "61637" to "https://cdn.myanimelist.net/images/anime/1765/154087.jpg", // Повседневная жизнь одинокого двадцатидевятилетнего авантюриста
+        "61814" to "https://cdn.myanimelist.net/images/anime/1082/158708.jpg", // Невеста демона
+        "61886" to "https://cdn.myanimelist.net/images/anime/1721/153380.jpg", // Повседневная жизнь стажёра-мучителя
+        "61967" to "https://cdn.myanimelist.net/images/anime/1602/158830.jpg", // Чёрный клевер 2
+        "61983" to "https://cdn.myanimelist.net/images/anime/1573/152828.jpg", // В команде героя была милая девушка, так что я признался ей
+        "61990" to "https://cdn.myanimelist.net/images/anime/1880/158764.jpg", // Киберпанк: Бегущие по краю 2
+        "62051" to "https://cdn.myanimelist.net/images/anime/1329/158716.jpg", // Шоу для взрослых: Цирк «Подсолнух»
+        "62068" to "https://cdn.myanimelist.net/images/anime/1786/156390.jpg", // Земля-снежок
+        "62078" to "https://cdn.myanimelist.net/images/anime/1891/158566.jpg", // Население приграничного владения начинается с нуля
+        "62080" to "https://cdn.myanimelist.net/images/anime/1612/158373.jpg", // Забывчивая святая дева неосознанно изливает свою силу
+        "62171" to "https://cdn.myanimelist.net/images/anime/1716/153989.jpg", // Чёрная кошка и класс ведьм
+        "62270" to "https://cdn.myanimelist.net/images/anime/1237/159287.jpg", // Ура мечте! Ave Mujica. Фильм
+        "62276" to "https://cdn.myanimelist.net/images/anime/1211/157100.jpg", // Повелитель тайн: Спецвыпуск
+        "62435" to "https://cdn.myanimelist.net/images/anime/1380/157378.jpg", // Самый сильный в мире заступник: Страна лабиринта и искатели приключений
+        "62513" to "https://cdn.myanimelist.net/images/anime/1741/157105.jpg", // Клеватесс 2: Король демонических зверей и легенда о ложном герое
+        "62568" to "https://cdn.myanimelist.net/images/anime/1773/155779.jpg", // Доктор Стоун: Научное будущее. Часть 3
+        "62582" to "https://cdn.myanimelist.net/images/anime/1286/159781.jpg", // Этот глупый свин не понимает мечту дорогой подруги
+        "62696" to "https://cdn.myanimelist.net/images/anime/1907/158537.jpg", // Полицейский-экстрасенс Тёдзё!
+        "62720" to "https://cdn.myanimelist.net/images/anime/1655/152574.jpg", // Маг на полную ставку: Опасность на севере
+        "62722" to "https://cdn.myanimelist.net/images/anime/1552/158648.jpg", // Огни морских глубин
+        "62726" to "https://cdn.myanimelist.net/images/anime/1856/157227.jpg", // Пожиратель звёзд: Битва на Изначальной звезде
+        "62727" to "https://cdn.myanimelist.net/images/anime/1679/152581.jpg", // Палач богов: Смерть в Цаннане
+        "62734" to "https://cdn.myanimelist.net/images/anime/1576/159454.jpg", // Странники духовного мира
+        "62876" to "https://cdn.myanimelist.net/images/anime/1116/157083.jpg", // Забота об одарённой девушке: В престижной школе, полной высококлассных учеников, я буду тайно заботиться о самой красивой девушке (не имеющей никаких жизненных навыков)
+        "62913" to "https://cdn.myanimelist.net/images/anime/1755/154935.jpg", // Зависимая девушка: Передозировка
+        "62922" to "https://cdn.myanimelist.net/images/anime/1498/159735.jpg", // Одолженная мной магия будет принудительно изъята посредством возобновляемого кредита
+        "62948" to "https://cdn.myanimelist.net/images/anime/1035/153596.jpg", // Проект капсул: Чудеса
+        "62949" to "https://cdn.myanimelist.net/images/anime/1652/155269.jpg", // Хорошее лекарство
+        "62987" to "https://cdn.myanimelist.net/images/anime/1845/153717.jpg", // Кулак Северной звезды: Реквием по рядовым головорезам армии короля кулака
+        "63033" to "https://cdn.myanimelist.net/images/anime/1091/153909.jpg", // Himitsu no AiPri Movie: Mankai Buzzlume Live!
+        "63042" to "https://cdn.myanimelist.net/images/anime/1706/154944.jpg", // Хорошенькое лекарство: Звёздный детектив
+        "63106" to "https://cdn.myanimelist.net/images/anime/1001/154350.jpg", // Хоппэ: Тайна королевства Сан и банда чёрных Хоппэ
+        "63276" to "https://cdn.myanimelist.net/images/anime/1780/154909.jpg", // Конфетный кариес
+        "63323" to "https://cdn.myanimelist.net/images/anime/1557/157677.jpg", // Бронированные воины Вотомы: Серая ведьма
+        "63427" to "https://cdn.myanimelist.net/images/anime/1181/155301.jpg", // Иные стремления Чжи Тана
+        "63431" to "https://cdn.myanimelist.net/images/anime/1356/158431.jpg", // Изгнанный читер-чародей наслаждается беззаботной второй жизнью: Я могу накладывать «очки усиления» не только на оружие, но и на что угодно, в любой момент отменяя эффект по собственной воле, а с теми, кто остался, всё нормально?
+        "63508" to "https://cdn.myanimelist.net/images/anime/1319/158376.jpg", // Необыкновенный неудачник: Дневник переродившегося колдуна S-ранга
+        "63667" to "https://cdn.myanimelist.net/images/anime/1315/159864.jpg", // Волшебные сёстры Лулутто Лилли. Часть 2
+        "63709" to "https://cdn.myanimelist.net/images/anime/1392/156024.jpg", // Рисовые богини
+        "63713" to "https://cdn.myanimelist.net/images/anime/1189/156034.jpg", // Джанкет банк
+        "63739" to "https://cdn.myanimelist.net/images/anime/1484/156122.jpg", // Если бы нам было дано родиться вновь
+        "63753" to "https://cdn.myanimelist.net/images/anime/1238/159816.jpg", // Издалека
+        "63773" to "https://cdn.myanimelist.net/images/anime/1909/156227.jpg", // Маленькое лекарство: Феи хорошенького лекарства 3
+        "63830" to "https://cdn.myanimelist.net/images/anime/1014/156363.jpg", // Re:Zero. Перерыв с нуля 4
+        "63901" to "https://cdn.myanimelist.net/images/anime/1551/159808.jpg", // Сиротан
+        "63938" to "https://cdn.myanimelist.net/images/anime/1380/159150.jpg", // Карточные бои Авангарда: Святая Зет — Сражение за звёздную судьбу
+        "63964" to "https://cdn.myanimelist.net/images/anime/1318/156822.jpg", // Расцвет молодости: Наша весна
+        "64218" to "https://cdn.myanimelist.net/images/anime/1829/158060.jpg", // Bouken wa Tsuzuiteiru.
+        "64254" to "https://cdn.myanimelist.net/images/anime/1190/159644.jpg", // Волшебник ледяного клинка правит миром 2
+        "64289" to "https://cdn.myanimelist.net/images/anime/1261/158229.jpg", // Фатальная ярость: Город волков — Мистер Карате
+        "64326" to "https://cdn.myanimelist.net/images/anime/1798/159431.jpg", // Семь рыцарей королевства Марронье
+        "64340" to "https://cdn.myanimelist.net/images/anime/1127/159616.jpg", // Во всеоружии: Сила артефактов
+        "64344" to "https://cdn.myanimelist.net/images/anime/1315/158345.jpg", // Король зверей и воинственный бог — Дендивайн
+        "64381" to "https://cdn.myanimelist.net/images/anime/1303/158439.jpg", // Осомацу-сан 4: Десятка Мацунo
+        "64388" to "https://cdn.myanimelist.net/images/anime/1920/158455.jpg", // Несравненный боевой дух 2
+        "64395" to "https://cdn.myanimelist.net/images/anime/1547/158473.jpg", // Кухня души
+        "64445" to "https://cdn.myanimelist.net/images/anime/1511/158622.jpg", // Противостояние святого: Война за истребление небожителей
+        "64459" to "https://cdn.myanimelist.net/images/anime/1977/158669.jpg", // Ночь дурака
+        "64578" to "https://cdn.myanimelist.net/images/anime/1205/158940.jpg", // Обожаю Землю! Киккун
+        "64598" to "https://cdn.myanimelist.net/images/anime/1967/158967.jpg", // Столбы морозного сияния
+        "64678" to "https://cdn.myanimelist.net/images/anime/1664/159166.jpg", // Почему паломники не возвращаются?
+        "64679" to "https://cdn.myanimelist.net/images/anime/1951/159167.jpg", // Роботы-пожарные Z
+        "64754" to "https://cdn.myanimelist.net/images/anime/1428/159724.jpg", // Божественная любовь: Переплетённые водой сердца
+        "64866" to "https://cdn.myanimelist.net/images/anime/1943/159715.jpg", // Давай дружить

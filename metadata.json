@@ -1,0 +1,6 @@
+{
+  "name": "ANIWERTI",
+  "description": "Современное мобильное приложение для поиска и просмотра аниме с российскими озвучками",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
