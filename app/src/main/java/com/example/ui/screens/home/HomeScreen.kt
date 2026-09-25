@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
@@ -143,8 +144,12 @@ fun HomeScreen(
                         anime = banner,
                         isFavorite = state.isBannerFavorite,
                         onWatchClick = {
-                            val title = AnimeTitleHelper.getDisplayTitle(banner)
-                            onWatchClick(banner.id, title)
+                            if (com.example.data.api.AnimeEpisodeHelper.isAnnouncement(banner)) {
+                                onAnimeClick(banner.id)
+                            } else {
+                                val title = AnimeTitleHelper.getDisplayTitle(banner)
+                                onWatchClick(banner.id, title)
+                            }
                         },
                         onFavoriteClick = { viewModel.toggleBannerFavorite() },
                         onDetailsClick = { onAnimeClick(banner.id) }
@@ -347,6 +352,8 @@ private fun HeroBanner(
     val context = LocalContext.current
     val colors = LocalAppColors.current
     val isUk = AppSettingsManager.isUkrainian()
+    val isAnons = com.example.data.api.AnimeEpisodeHelper.isAnnouncement(anime)
+    val anonsDate = if (isAnons) com.example.data.api.AnimeEpisodeHelper.formatAnnouncementDate(anime.airedOn, isUk) else null
 
     val posterUrl = AnimeRepository.resolveImageUrl(
         anime.image?.original ?: anime.image?.preview,
@@ -408,16 +415,24 @@ private fun HeroBanner(
                     letterSpacing = 1.sp
                 )
             }
+
             Spacer(modifier = Modifier.weight(1f))
             Box(
                 modifier = Modifier
-                    .background(Color(0xAA000000), CircleShape)
-                    .border(1.dp, colors.primary.copy(alpha = 0.4f), CircleShape)
+                    .background(
+                        if (isAnons) Color(0xDDFF8F00) else Color(0xAA000000),
+                        CircleShape
+                    )
+                    .border(
+                        1.dp,
+                        if (isAnons) Color(0xFFFFB300) else colors.primary.copy(alpha = 0.4f),
+                        CircleShape
+                    )
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = if (isUk) "Новинка 2026" else "Новинка 2026",
-                    color = colors.primary,
+                    text = if (isAnons) (if (isUk) "Анонс" else "Анонс") else (if (isUk) "Новинка 2026" else "Новинка 2026"),
+                    color = if (isAnons) Color.Black else colors.primary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -433,35 +448,78 @@ private fun HeroBanner(
         ) {
             // Badges row
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .background(Color(0xDD0B0B0B), RoundedCornerShape(6.dp))
-                        .border(0.5.dp, colors.primary.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 6.dp, vertical = 3.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = if (isUk) "Рейтинг" else "Рейтинг",
-                            tint = RatingGold,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                if (isAnons) {
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400))),
+                                RoundedCornerShape(6.dp)
+                            )
+                            .padding(horizontal = 7.dp, vertical = 3.dp)
+                    ) {
                         Text(
-                            text = score,
-                            color = Color.White,
+                            text = "Анонс",
+                            color = Color.Black,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
+                            fontSize = 11.sp
                         )
                     }
+                    if (!anonsDate.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xEE2A1C00), RoundedCornerShape(6.dp))
+                                .border(0.8.dp, Color(0xFFFFB300).copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 7.dp, vertical = 3.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFFB300),
+                                    modifier = Modifier.size(12.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = anonsDate,
+                                    color = Color(0xFFFFE082),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xDD0B0B0B), RoundedCornerShape(6.dp))
+                            .border(0.5.dp, colors.primary.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = if (isUk) "Рейтинг" else "Рейтинг",
+                                tint = RatingGold,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = score,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "$year • ${(anime.kind ?: "TV").uppercase()}",
+                        color = Color.White.copy(alpha = 0.8f),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "$year • ${(anime.kind ?: "TV").uppercase()}",
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
             }
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -492,29 +550,56 @@ private fun HeroBanner(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
-                    onClick = onWatchClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                        .testTag("banner_watch_button"),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.primary,
-                        contentColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = if (isUk) "Дивитися" else "Смотреть",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = if (isUk) "Дивитися" else "Смотреть",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp
-                    )
+                if (isAnons) {
+                    Button(
+                        onClick = onDetailsClick,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .testTag("banner_details_button"),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF9800),
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = "Анонс",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isUk) "Анонс • Детальніше" else "Анонс • Подробнее",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                    }
+                } else {
+                    Button(
+                        onClick = onWatchClick,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp)
+                            .testTag("banner_watch_button"),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colors.primary,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = if (isUk) "Дивитися" else "Смотреть",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isUk) "Дивитися" else "Смотреть",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))

@@ -95,102 +95,97 @@ fun ChatScreen(
             .imePadding()
     ) {
         // Modern Top App Bar with theme integration
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(colors.surface)
-                .statusBarsPadding()
-                .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
-                .border(
-                    width = 0.5.dp,
-                    color = colors.glassBorder.copy(alpha = 0.4f),
-                    shape = RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp)
-                ),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = onBackClick,
+        Column(modifier = Modifier.fillMaxWidth().background(colors.surface)) {
+            Row(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(colors.surfaceVariant)
-                    .testTag("chat_back_button")
+                    .fillMaxWidth()
+                    .statusBarsPadding()
+                    .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = if (isUk) "Назад" else "Назад",
-                    tint = colors.textPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            // Friend Avatar with Online / Offline Badge
-            Box(modifier = Modifier.size(44.dp)) {
-                Box(
+                IconButton(
+                    onClick = onBackClick,
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(38.dp)
                         .clip(CircleShape)
                         .background(colors.surfaceVariant)
-                        .border(1.5.dp, colors.primary.copy(alpha = 0.7f), CircleShape),
-                    contentAlignment = Alignment.Center
+                        .testTag("chat_back_button")
                 ) {
-                    UserAvatar(
-                        avatarUrl = friendAvatarUrl,
-                        modifier = Modifier.fillMaxSize(),
-                        contentDescription = friendDisplayName,
-                        showVideoBadge = false
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = if (isUk) "Назад" else "Назад",
+                        tint = colors.textPrimary,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                // Online indicator
-                Box(
-                    modifier = Modifier
-                        .size(13.dp)
-                        .align(Alignment.BottomEnd)
-                        .background(
-                            if (isOnline) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
-                            CircleShape
-                        )
-                        .border(2.dp, colors.surface, CircleShape)
-                )
-            }
+                Spacer(modifier = Modifier.width(10.dp))
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = friendDisplayName,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
-                    ),
-                    maxLines = 1
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // Friend Avatar with Online / Offline Badge
+                Box(modifier = Modifier.size(42.dp)) {
                     Box(
                         modifier = Modifier
-                            .size(7.dp)
+                            .size(42.dp)
+                            .clip(CircleShape)
+                            .background(colors.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        UserAvatar(
+                            avatarUrl = friendAvatarUrl,
+                            modifier = Modifier.fillMaxSize(),
+                            contentDescription = friendDisplayName,
+                            showVideoBadge = false
+                        )
+                    }
+
+                    // Online indicator
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .align(Alignment.BottomEnd)
                             .background(
                                 if (isOnline) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
                                 CircleShape
                             )
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isOnline) {
-                            if (isUk) "В мережі" else "В сети"
-                        } else {
-                            if (isUk) "Не в мережі" else "Не в сети"
-                        },
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = if (isOnline) Color(0xFF4CAF50) else colors.textMuted,
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 11.sp
-                        )
+                        text = friendDisplayName,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary,
+                            fontSize = 16.sp
+                        ),
+                        maxLines = 1
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .background(
+                                    if (isOnline) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
+                                    CircleShape
+                                )
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = if (isOnline) {
+                                if (isUk) "В мережі" else "В сети"
+                            } else {
+                                if (isUk) "Не в мережі" else "Не в сети"
+                            },
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                color = if (isOnline) Color(0xFF4CAF50) else colors.textMuted,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 11.sp
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -265,64 +260,61 @@ fun ChatScreen(
         }
 
         // Modern Bottom Input Bar
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(colors.surface)
-                .padding(horizontal = 14.dp, vertical = 10.dp)
-                .border(
-                    width = 0.5.dp,
-                    color = colors.glassBorder.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)
-                ),
-            verticalAlignment = Alignment.CenterVertically
         ) {
-            TextField(
-                value = state.inputText,
-                onValueChange = { viewModel.onInputTextChange(it) },
-                placeholder = {
-                    Text(
-                        text = if (isUk) "Повідомлення або #ID аніме..." else "Сообщение или #ID аниме...",
-                        color = colors.textMuted,
-                        fontSize = 14.sp
-                    )
-                },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = colors.surfaceVariant,
-                    unfocusedContainerColor = colors.surfaceVariant,
-                    focusedTextColor = colors.textPrimary,
-                    unfocusedTextColor = colors.textPrimary,
-                    cursorColor = colors.primary,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(24.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(onSend = { viewModel.sendMessage() }),
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .testTag("chat_message_input")
-            )
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            IconButton(
-                onClick = { viewModel.sendMessage() },
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(
-                        brush = Brush.horizontalGradient(listOf(colors.primary, colors.secondary))
-                    )
-                    .shadow(elevation = 6.dp, shape = CircleShape, ambientColor = colors.primary)
-                    .testTag("chat_send_button")
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = if (isUk) "Надіслати" else "Отправить",
-                    tint = Color.Black,
-                    modifier = Modifier.size(19.dp)
+                TextField(
+                    value = state.inputText,
+                    onValueChange = { viewModel.onInputTextChange(it) },
+                    placeholder = {
+                        Text(
+                            text = if (isUk) "Повідомлення або #ID аніме..." else "Сообщение или #ID аниме...",
+                            color = colors.textMuted,
+                            fontSize = 14.sp
+                        )
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = colors.surfaceVariant,
+                        unfocusedContainerColor = colors.surfaceVariant,
+                        focusedTextColor = colors.textPrimary,
+                        unfocusedTextColor = colors.textPrimary,
+                        cursorColor = colors.primary,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    shape = RoundedCornerShape(24.dp),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                    keyboardActions = KeyboardActions(onSend = { viewModel.sendMessage() }),
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("chat_message_input")
                 )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                IconButton(
+                    onClick = { viewModel.sendMessage() },
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(colors.primary)
+                        .testTag("chat_send_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = if (isUk) "Надіслати" else "Отправить",
+                        tint = Color.Black,
+                        modifier = Modifier.size(19.dp)
+                    )
+                }
             }
         }
     }
@@ -354,8 +346,7 @@ private fun ChatMessageBubble(
                 modifier = Modifier
                     .size(30.dp)
                     .clip(CircleShape)
-                    .background(colors.surfaceVariant)
-                    .border(1.dp, colors.primary.copy(alpha = 0.5f), CircleShape),
+                    .background(colors.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 UserAvatar(
@@ -368,64 +359,39 @@ private fun ChatMessageBubble(
             Spacer(modifier = Modifier.width(8.dp))
         }
 
+        val bubbleShape = if (isMine) {
+            RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 18.dp, bottomEnd = 4.dp)
+        } else {
+            RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 4.dp, bottomEnd = 18.dp)
+        }
+
         Box(
             modifier = Modifier
-                .widthIn(max = 300.dp)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = if (isMine) 18.dp else 4.dp,
-                        bottomEnd = if (isMine) 4.dp else 18.dp
-                    )
-                )
+                .widthIn(max = 290.dp)
+                .clip(bubbleShape)
                 .background(
-                    if (isMine) {
-                        Brush.horizontalGradient(listOf(colors.secondary, colors.primary))
-                    } else {
-                        Brush.linearGradient(
-                            listOf(
-                                colors.surface,
-                                colors.surfaceVariant
-                            )
-                        )
-                    }
-                )
-                .border(
-                    width = 1.dp,
-                    color = if (isMine) Color.Transparent else colors.glassBorder,
-                    shape = RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = if (isMine) 18.dp else 4.dp,
-                        bottomEnd = if (isMine) 4.dp else 18.dp
-                    )
+                    if (isMine) Color(0xFF2C2214) else colors.surfaceVariant
                 )
                 .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Column {
                 Text(
                     text = message.text,
-                    color = if (isMine) Color(0xFF111111) else colors.textPrimary,
+                    color = if (isMine) Color.White.copy(alpha = 0.95f) else colors.textPrimary,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Normal
                 )
 
-                // If message contains an anime ID, render a modern interactive link card
+                // If message contains an anime ID, render a clean interactive link card
                 if (animeId != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isMine) Color(0x33000000) else colors.primary.copy(alpha = 0.12f)
-                            )
-                            .border(
-                                1.dp,
-                                if (isMine) Color(0x44000000) else colors.primary.copy(alpha = 0.4f),
-                                RoundedCornerShape(12.dp)
+                                if (isMine) Color(0x33000000) else colors.surface.copy(alpha = 0.7f)
                             )
                             .clickable { onAnimeClick(animeId) }
                             .padding(horizontal = 10.dp, vertical = 8.dp)
@@ -435,40 +401,40 @@ private fun ChatMessageBubble(
                         Icon(
                             imageVector = Icons.Default.PlayCircle,
                             contentDescription = if (isUk) "Дивитися аніме" else "Смотреть аниме",
-                            tint = if (isMine) Color(0xFF111111) else colors.primary,
-                            modifier = Modifier.size(22.dp)
+                            tint = if (isMine) Color(0xFFFFB300) else colors.primary,
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = if (isUk) "Аніме #$animeId" else "Аниме #$animeId",
-                                color = if (isMine) Color(0xFF111111) else colors.primary,
+                                color = if (isMine) Color(0xFFFFB300) else colors.primary,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp
                             )
                             Text(
                                 text = if (isUk) "Натисніть для перегляду" else "Нажмите для просмотра",
-                                color = if (isMine) Color(0x99000000) else colors.textSecondary,
+                                color = if (isMine) Color.White.copy(alpha = 0.65f) else colors.textSecondary,
                                 fontSize = 10.sp
                             )
                         }
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                             contentDescription = null,
-                            tint = if (isMine) Color(0xFF111111) else colors.primary,
-                            modifier = Modifier.size(12.dp)
+                            tint = if (isMine) Color(0xFFFFB300) else colors.primary,
+                            modifier = Modifier.size(11.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(3.dp))
                 Row(
                     modifier = Modifier.align(Alignment.End),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = formattedTime,
-                        color = if (isMine) Color(0x99000000) else colors.textMuted,
+                        color = if (isMine) Color(0xFFFFD54F).copy(alpha = 0.75f) else colors.textMuted,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -477,7 +443,7 @@ private fun ChatMessageBubble(
                         Icon(
                             imageVector = Icons.Default.DoneAll,
                             contentDescription = null,
-                            tint = Color(0x99000000),
+                            tint = Color(0xFFFFB300),
                             modifier = Modifier.size(13.dp)
                         )
                     }

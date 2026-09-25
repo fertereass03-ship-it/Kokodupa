@@ -244,6 +244,11 @@ class CatalogViewModel(application: Application) : AndroidViewModel(application)
     fun applyPreset(preset: String) {
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         when (preset) {
+            "anons", "announcements", "upcoming" -> {
+                _uiState.value = _uiState.value.copy(isFilterSheetOpen = false)
+                selectTab("ANONS")
+                return
+            }
             "popular", "top_popular" -> {
                 _uiState.value = _uiState.value.copy(isFilterSheetOpen = false)
                 selectTab("POPULAR")
@@ -317,9 +322,22 @@ class CatalogViewModel(application: Application) : AndroidViewModel(application)
             )
             try {
                 val results = when (tab) {
-                    "NEW" -> repository.get2026Releases(limit = 100, page = 1)
-                    "POPULAR" -> repository.getPopularAnimes(limit = 100, page = 1)
-                    "RECOMMENDATIONS" -> repository.getRecommendations(limit = 100, page = 1)
+                    "ANONS" -> {
+                        val raw = repository.getAnonsAnimes(limit = 100, page = 1)
+                        raw.filter { com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) || it.status.equals("anons", ignoreCase = true) }
+                    }
+                    "NEW" -> {
+                        val raw = repository.get2026Releases(limit = 100, page = 1)
+                        raw.filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
+                    }
+                    "POPULAR" -> {
+                        val raw = repository.getPopularAnimes(limit = 100, page = 1)
+                        raw.filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
+                    }
+                    "RECOMMENDATIONS" -> {
+                        val raw = repository.getRecommendations(limit = 100, page = 1)
+                        raw.filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
+                    }
                     else -> {
                         val filter = _uiState.value.filter
                         val genreParam = if (filter.selectedGenreIds.isNotEmpty()) {
@@ -339,15 +357,21 @@ class CatalogViewModel(application: Application) : AndroidViewModel(application)
                         )
 
                         // When in default "ALL" tab without active filters, prepend the Yani catalog items
-                        if (filter.query.isBlank() && filter.selectedGenreIds.isEmpty() && filter.selectedKind == null && filter.selectedStatus == null) {
+                        val combined = if (filter.query.isBlank() && filter.selectedGenreIds.isEmpty() && filter.selectedKind == null && filter.selectedStatus == null) {
                             val yaniItems = com.example.data.api.YaniCatalogService.getCatalog().map { item ->
                                 with(com.example.data.api.YaniCatalogService) { item.toShikimoriAnimeDto() }
                             }
                             val yaniIds = yaniItems.map { it.id }.toSet()
-                            val combined = yaniItems + searchResults.filter { it.id !in yaniIds }
-                            combined
+                            yaniItems + searchResults.filter { it.id !in yaniIds }
                         } else {
                             searchResults
+                        }
+
+                        // Announcements should ONLY appear when user explicitly selected ANONS tab or filtered by status anons
+                        if (filter.selectedStatus == null) {
+                            combined.filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
+                        } else {
+                            combined
                         }
                     }
                 }
@@ -382,15 +406,20 @@ class CatalogViewModel(application: Application) : AndroidViewModel(application)
 
             try {
                 val nextBatch = when (tab) {
+                    "ANONS" -> repository.getAnonsAnimes(limit = 50, page = nextPage + 1)
+                        .filter { com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) || it.status.equals("anons", ignoreCase = true) }
                     "NEW" -> repository.get2026Releases(limit = 50, page = nextPage + 1)
+                        .filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
                     "POPULAR" -> repository.getPopularAnimes(limit = 50, page = nextPage + 1)
+                        .filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
                     "RECOMMENDATIONS" -> repository.getRecommendations(limit = 50, page = nextPage + 1)
+                        .filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
                     else -> {
                         val filter = currentState.filter
                         val genreParam = if (filter.selectedGenreIds.isNotEmpty()) {
                             filter.selectedGenreIds.joinToString(",")
                         } else null
-                        repository.searchCatalog(
+                        val rawMore = repository.searchCatalog(
                             query = filter.query,
                             page = nextPage,
                             limit = 50,
@@ -402,6 +431,11 @@ class CatalogViewModel(application: Application) : AndroidViewModel(application)
                             maxYear = filter.maxYear,
                             score = filter.minScore
                         )
+                        if (filter.selectedStatus == null) {
+                            rawMore.filter { !com.example.data.api.AnimeEpisodeHelper.isAnnouncement(it) && !it.status.equals("anons", ignoreCase = true) }
+                        } else {
+                            rawMore
+                        }
                     }
                 }
 

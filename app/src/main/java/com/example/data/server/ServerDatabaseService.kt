@@ -367,7 +367,7 @@ class ServerDatabaseService private constructor(private val context: Context) {
         return result
     }
 
-    private val firestore: FirebaseFirestore? by lazy {
+    val firestore: FirebaseFirestore? by lazy {
         try {
             if (FirebaseApp.getApps(context).isNotEmpty()) {
                 FirebaseFirestore.getInstance()
@@ -379,6 +379,8 @@ class ServerDatabaseService private constructor(private val context: Context) {
             null
         }
     }
+
+    fun getFirestoreInstance(): FirebaseFirestore? = firestore
 
     // --- Profile Management ---
 

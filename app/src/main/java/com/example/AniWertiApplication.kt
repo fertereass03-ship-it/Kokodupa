@@ -11,8 +11,25 @@ import coil.memory.MemoryCache
 
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
+import android.util.Log
+import com.example.data.db.AnimeDatabase
+import com.example.data.realtime.RealtimeSocialManager
+import com.example.data.session.UserSessionManager
+import com.example.data.settings.AppSettingsManager
 
 class AniWertiApplication : Application(), ImageLoaderFactory {
+    override fun onCreate() {
+        super.onCreate()
+        try {
+            AppSettingsManager.init(this)
+            UserSessionManager.getInstance(this)
+            AnimeDatabase.getDatabase(this)
+            RealtimeSocialManager.getInstance(this)
+        } catch (e: Throwable) {
+            Log.e("AniWertiApp", "Warm-up init exception", e)
+        }
+    }
+
     override fun newImageLoader(): ImageLoader {
         val okHttpClient = OkHttpClient.Builder()
             .followRedirects(true)

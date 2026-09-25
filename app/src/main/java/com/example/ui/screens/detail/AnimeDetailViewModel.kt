@@ -78,14 +78,14 @@ class AnimeDetailViewModel(
                 val screenshots = screenshotsDeferred.await()
                 val similar = similarDeferred.await()
 
-                val title = details?.russian?.takeIf { it.isNotBlank() } ?: details?.name
+                val title = details.russian?.takeIf { it.isNotBlank() } ?: details.name
 
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     anime = details,
                     screenshots = screenshots,
                     similarAnime = similar,
-                    isTranslationsLoading = details != null,
+                    isTranslationsLoading = true,
                     errorMessage = null
                 )
 
@@ -99,7 +99,8 @@ class AnimeDetailViewModel(
                     }
                 }
 
-                if (details != null) {
+                val isAnons = com.example.data.api.AnimeEpisodeHelper.isAnnouncement(details)
+                if (!isAnons) {
                     val isMovie = details.kind == "movie" || (details.episodes ?: 0) == 1
                     viewModelScope.launch {
                         try {
@@ -112,6 +113,11 @@ class AnimeDetailViewModel(
                             _uiState.value = _uiState.value.copy(isTranslationsLoading = false)
                         }
                     }
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        translations = emptyList(),
+                        isTranslationsLoading = false
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

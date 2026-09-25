@@ -182,11 +182,18 @@ fun AnimeDetailScreen(
         "special" -> "Спешл"
         else -> anime.kind?.uppercase() ?: "TV"
     }
-    val status = when (anime.status?.lowercase()) {
-        "ongoing" -> "Онгоинг"
-        "released" -> "Завершено"
+    val isUk = com.example.data.settings.AppSettingsManager.isUkrainian()
+    val isAnons = com.example.data.api.AnimeEpisodeHelper.isAnnouncement(anime)
+    val announcementDateText = remember(anime.airedOn, anime.description, isUk) {
+        com.example.data.api.AnimeEpisodeHelper.formatAnnouncementDate(anime.airedOn, isUk, anime.description)
+    }
+    val status = if (isAnons) {
+        "Анонс"
+    } else when (anime.status?.lowercase()) {
+        "ongoing" -> if (isUk) "Онгоїнг" else "Онгоинг"
+        "released" -> if (isUk) "Завершено" else "Завершено"
         "anons" -> "Анонс"
-        else -> anime.status ?: "Выходит"
+        else -> anime.status ?: if (isUk) "Виходить" else "Выходит"
     }
 
     // Copy anime ID to clipboard
@@ -361,8 +368,8 @@ fun AnimeDetailScreen(
                     val maxVoiceEp = voiceDubs.maxOfOrNull { it.episodesCount }
                         ?: state.translations.maxOfOrNull { it.episodesCount }
 
-                    val isOngoingStatus = anime.status?.contains("ongoing", ignoreCase = true) == true
-                    val isAnonsStatus = anime.status?.contains("anons", ignoreCase = true) == true
+                    val isAnonsStatus = isAnons
+                    val isOngoingStatus = !isAnons && anime.status?.contains("ongoing", ignoreCase = true) == true
 
                     val isUk = com.example.data.settings.AppSettingsManager.isUkrainian()
                     val helperInfo = liveEpisodes[anime.id] ?: com.example.data.api.AnimeEpisodeHelper.getEpisodeInfo(anime, isUk)
@@ -370,6 +377,7 @@ fun AnimeDetailScreen(
 
                     // Accurate voiced episodes calculation: Kodik translations or live update is absolute priority
                     val actualAiredEp: Int? = when {
+                        isAnonsStatus -> 0
                         maxVoiceEp != null && maxVoiceEp > 0 -> {
                             val base = maxOf(anime.episodesAired ?: 0, helperInfo.airedEpisodes ?: 0)
                             maxOf(maxVoiceEp, base)
@@ -379,10 +387,10 @@ fun AnimeDetailScreen(
                         else -> null
                     }
 
-                    val isOngoing = isOngoingStatus || (actualAiredEp != null && actualAiredEp < effectiveTotal && !isAnonsStatus) || helperInfo.isOngoing
+                    val isOngoing = !isAnonsStatus && (isOngoingStatus || (actualAiredEp != null && actualAiredEp < effectiveTotal) || helperInfo.isOngoing)
 
                     val episodesLabel = when {
-                        isAnonsStatus -> if (isUk) "Анонс ($effectiveTotal сер.)" else "Анонс ($effectiveTotal эп.)"
+                        isAnonsStatus -> if (isUk) "Анонс" else "Анонс"
                         isOngoing && actualAiredEp != null && actualAiredEp < effectiveTotal -> {
                             if (isUk) "$actualAiredEp з $effectiveTotal сер." else "$actualAiredEp из $effectiveTotal сер."
                         }
@@ -531,13 +539,19 @@ fun AnimeDetailScreen(
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .background(SurfaceVariantDark, RoundedCornerShape(6.dp))
-                                            .border(0.5.dp, Color(0x44FF9100), RoundedCornerShape(6.dp))
-                                            .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                                            .background(
+                                                brush = if (isAnons) {
+                                                    Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400)))
+                                                } else {
+                                                    Brush.horizontalGradient(listOf(Color(0xFFE65100), AccentOrange))
+                                                },
+                                                shape = RoundedCornerShape(6.dp)
+                                            )
+                                            .padding(horizontal = 7.dp, vertical = 2.5.dp)
                                     ) {
                                         Text(
                                             text = status,
-                                            color = AccentOrange,
+                                            color = if (isAnons) Color.Black else Color.White,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp
                                         )
@@ -553,49 +567,75 @@ fun AnimeDetailScreen(
                                     )
                                 }
 
-                                // Badges: Episodes count & Dubbing count
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
+                                if (isAnons) {
+                                    // Announcement release date badge (yellow-orange theme)
                                     Box(
                                         modifier = Modifier
-                                            .background(Color(0xFF1E222D), RoundedCornerShape(6.dp))
-                                            .border(0.8.dp, Color(0x555C6B73), RoundedCornerShape(6.dp))
-                                            .padding(horizontal = 6.dp, vertical = 2.5.dp)
-                                    ) {
-                                        Text(
-                                            text = episodesLabel,
-                                            color = TextPrimary,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp
-                                        )
-                                    }
-
-                                    Box(
-                                        modifier = Modifier
-                                            .background(Color(0xFF162A1B), RoundedCornerShape(6.dp))
-                                            .border(0.8.dp, Color(0xFF4CAF50), RoundedCornerShape(6.dp))
-                                            .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                                            .background(Color(0xEE2A1C00), RoundedCornerShape(6.dp))
+                                            .border(0.8.dp, Color(0xFFFFB300).copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                                            .padding(horizontal = 8.dp, vertical = 2.5.dp)
                                     ) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Icon(
-                                                imageVector = Icons.Default.Mic,
+                                                imageVector = Icons.Default.CalendarMonth,
                                                 contentDescription = null,
-                                                tint = Color(0xFF4CAF50),
-                                                modifier = Modifier.size(11.dp)
+                                                tint = Color(0xFFFFB300),
+                                                modifier = Modifier.size(13.dp)
                                             )
-                                            Spacer(modifier = Modifier.width(3.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
                                             Text(
-                                                text = if (state.isTranslationsLoading) {
-                                                    "Озвучено: ..."
-                                                } else {
-                                                    "Озвучено: ${maxVoiceEp ?: actualAiredEp ?: "?"} эп."
-                                                },
-                                                color = Color(0xFF81C784),
-                                                fontWeight = FontWeight.ExtraBold,
+                                                text = announcementDateText,
+                                                color = Color(0xFFFFE082),
+                                                fontWeight = FontWeight.Bold,
                                                 fontSize = 11.sp
                                             )
+                                        }
+                                    }
+                                } else {
+                                    // Badges: Episodes count & Dubbing count
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .background(Color(0xFF1E222D), RoundedCornerShape(6.dp))
+                                                .border(0.8.dp, Color(0x555C6B73), RoundedCornerShape(6.dp))
+                                                .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                                        ) {
+                                            Text(
+                                                text = episodesLabel,
+                                                color = TextPrimary,
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 11.sp
+                                            )
+                                        }
+
+                                        Box(
+                                            modifier = Modifier
+                                                .background(Color(0xFF162A1B), RoundedCornerShape(6.dp))
+                                                .border(0.8.dp, Color(0xFF4CAF50), RoundedCornerShape(6.dp))
+                                                .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Mic,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFF4CAF50),
+                                                    modifier = Modifier.size(11.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(3.dp))
+                                                Text(
+                                                    text = if (state.isTranslationsLoading) {
+                                                        "Озвучено: ..."
+                                                    } else {
+                                                        "Озвучено: ${maxVoiceEp ?: actualAiredEp ?: "?"} эп."
+                                                    },
+                                                    color = Color(0xFF81C784),
+                                                    fontWeight = FontWeight.ExtraBold,
+                                                    fontSize = 11.sp
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -603,54 +643,56 @@ fun AnimeDetailScreen(
                         }
                     }
 
-                    // Watch Progress Banner if watched
-                    state.history?.let { hist ->
-                        Spacer(modifier = Modifier.height(14.dp))
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
-                            shape = RoundedCornerShape(12.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x33FFC400))
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = "Вы остановились на: Серия ${hist.episodeNumber}",
-                                        color = TextPrimary,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.sp
-                                    )
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    Text(
-                                        text = "${hist.progressPercent}%",
+                    // Watch Progress Banner if watched (only for released anime, not announcements)
+                    if (!isAnons) {
+                        state.history?.let { hist ->
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                                shape = RoundedCornerShape(12.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0x33FFC400))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = if (isUk) "Ви зупинилися на: Серія ${hist.episodeNumber}" else "Вы остановились на: Серия ${hist.episodeNumber}",
+                                            color = TextPrimary,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.sp
+                                        )
+                                        Spacer(modifier = Modifier.weight(1f))
+                                        Text(
+                                            text = "${hist.progressPercent}%",
+                                            color = PrimaryYellow,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    LinearProgressIndicator(
+                                        progress = { hist.progressPercent / 100f },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(4.dp),
                                         color = PrimaryYellow,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = 13.sp
+                                        trackColor = SurfaceVariantDark
                                     )
                                 }
-                                Spacer(modifier = Modifier.height(6.dp))
-                                LinearProgressIndicator(
-                                    progress = { hist.progressPercent / 100f },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(4.dp),
-                                    color = PrimaryYellow,
-                                    trackColor = SurfaceVariantDark
-                                )
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Action Row: Watch button (slightly resized) + Status selector cell
+                    // Action Row: Watch button or Announcement card + Status selector cell
                     val currentCategory = state.favorite?.category
                     val statusLabel = when (currentCategory) {
-                        FavoriteCategory.COMPLETED -> "Просмотрено"
-                        FavoriteCategory.WATCHING -> "Смотрю"
-                        FavoriteCategory.PLAN_TO_WATCH -> "Планирую"
-                        FavoriteCategory.DROPPED -> "Брошено"
-                        null -> "Не смотрю"
+                        FavoriteCategory.COMPLETED -> if (isUk) "Переглянуто" else "Просмотрено"
+                        FavoriteCategory.WATCHING -> if (isUk) "Дивлюся" else "Смотрю"
+                        FavoriteCategory.PLAN_TO_WATCH -> if (isUk) "Планую" else "Планирую"
+                        FavoriteCategory.DROPPED -> if (isUk) "Покинуто" else "Брошено"
+                        null -> if (isUk) "Не дивлюся" else "Не смотрю"
                     }
                     val statusTint = when (currentCategory) {
                         FavoriteCategory.COMPLETED -> Color(0xFF4CAF50)
@@ -672,32 +714,86 @@ fun AnimeDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Resized "Смотреть" Button
-                        Button(
-                            onClick = { onWatchClick(anime.id, displayName) },
-                            modifier = Modifier
-                                .weight(1.3f)
-                                .height(50.dp)
-                                .testTag("detail_watch_button"),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = PrimaryYellow,
-                                contentColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(14.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Смотреть",
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (state.history != null) "Продолжить" else "Смотреть",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                        if (isAnons) {
+                            // Announcement release date card (NO watch button)
+                            Box(
+                                modifier = Modifier
+                                    .weight(1.3f)
+                                    .height(50.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(Color(0xFF2E1C00), Color(0xFF452A02))
+                                        )
+                                    )
+                                    .border(1.2.dp, Color(0xFFFFB300).copy(alpha = 0.6f), RoundedCornerShape(14.dp))
+                                    .padding(horizontal = 12.dp)
+                                    .testTag("detail_announcement_banner"),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .background(Color(0xFFFFB300).copy(alpha = 0.2f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CalendarMonth,
+                                            contentDescription = "Анонс",
+                                            tint = Color(0xFFFFB300),
+                                            modifier = Modifier.size(19.dp)
+                                        )
+                                    }
+                                    Column(verticalArrangement = Arrangement.Center) {
+                                        Text(
+                                            text = if (isUk) "Статус: Анонс" else "Статус: Анонс",
+                                            fontSize = 10.5.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFFFFB300)
+                                        )
+                                        Text(
+                                            text = announcementDateText,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            // Resized "Смотреть" Button
+                            Button(
+                                onClick = { onWatchClick(anime.id, displayName) },
+                                modifier = Modifier
+                                    .weight(1.3f)
+                                    .height(50.dp)
+                                    .testTag("detail_watch_button"),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = PrimaryYellow,
+                                    contentColor = Color.Black
+                                ),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = if (isUk) "Дивитися" else "Смотреть",
+                                    modifier = Modifier.size(22.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = if (state.history != null) (if (isUk) "Продовжити" else "Продолжить") else (if (isUk) "Дивитися" else "Смотреть"),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
 
                         // "Статус" Cell Button
@@ -847,30 +943,30 @@ fun AnimeDetailScreen(
                 }
             }
 
-            // --- 5. Anime Screenshots Gallery (10 items) ---
-            if (state.screenshots.isNotEmpty()) {
-                item {
-                    Column(modifier = Modifier.padding(vertical = 10.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Collections,
-                                contentDescription = null,
-                                tint = PrimaryYellow,
-                                modifier = Modifier.size(20.dp)
+            // --- 5. Anime Screenshots Gallery or Not Found State ---
+            item {
+                Column(modifier = Modifier.padding(vertical = 10.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Collections,
+                            contentDescription = null,
+                            tint = PrimaryYellow,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (isUk) "Кадри з аніме" else "Кадры из аниме",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Кадры из аниме",
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextPrimary
-                                )
-                            )
+                        )
+                        if (state.screenshots.isNotEmpty()) {
                             Spacer(modifier = Modifier.width(8.dp))
                             Box(
                                 modifier = Modifier
@@ -878,16 +974,18 @@ fun AnimeDetailScreen(
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
-                                    text = "${state.screenshots.size} кадров",
+                                    text = if (isUk) "${state.screenshots.size} кадрів" else "${state.screenshots.size} кадров",
                                     color = PrimaryYellow,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
+                    }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
+                    if (state.screenshots.isNotEmpty()) {
                         LazyRow(
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -922,13 +1020,62 @@ fun AnimeDetailScreen(
                                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
                                             Text(
-                                                text = "${index + 1}/10",
+                                                text = "${index + 1}/${state.screenshots.size}",
                                                 color = Color.White,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
                                     }
+                                }
+                            }
+                        }
+                    } else {
+                        // Card displayed when no screenshots exist (e.g. unreleased announcement)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = SurfaceCard),
+                            border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(0x33FFC400))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .background(PrimaryYellow.copy(alpha = 0.12f), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Collections,
+                                        contentDescription = null,
+                                        tint = PrimaryYellow,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        text = if (isUk) "Скріншоти не знайдені до цього тайтла" else "Скриншоты не найдены к этому тайтлу",
+                                        color = TextPrimary,
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = if (isUk)
+                                            "Офіційні кадри до цього релізу ще не опубліковані в базі"
+                                        else
+                                            "Официальные кадры к этому релизу еще не опубликованы в базе",
+                                        color = TextSecondary,
+                                        fontSize = 11.5.sp
+                                    )
                                 }
                             }
                         }

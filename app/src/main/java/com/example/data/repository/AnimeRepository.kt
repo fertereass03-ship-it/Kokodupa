@@ -201,6 +201,38 @@ class AnimeRepository(context: Context) {
         com.example.data.api.AniListService.enrichAnimeCovers(fallback)
     }
 
+    suspend fun getAnonsAnimes(limit: Int = 100, page: Int = 1): List<ShikimoriAnimeDto> = withContext(Dispatchers.IO) {
+        try {
+            val startPage = (page - 1) * 2 + 1
+            val pagesToFetch = if (limit <= 50) listOf(page) else listOf(startPage, startPage + 1)
+            val fetchedList = mutableListOf<ShikimoriAnimeDto>()
+
+            for (p in pagesToFetch) {
+                try {
+                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, status = "anons", order = "popularity")
+                    fetchedList.addAll(batch)
+                    if (batch.isEmpty()) break
+                } catch (e: Exception) {
+                    Log.w(TAG, "Error fetching anons page $p: ${e.message}")
+                }
+            }
+
+            val validAnimes = fetchedList
+                .filter { !isFakeOrNonExistentAnime(it) }
+                .distinctBy { it.id }
+                .take(limit)
+
+            if (validAnimes.isNotEmpty()) {
+                val enriched = com.example.data.api.AniListService.enrichAnimeCovers(validAnimes)
+                return@withContext enriched
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to load anons animes from Shikimori: ${e.message}")
+        }
+        val fallback = getMockAnonsAnimes().filter { !isFakeOrNonExistentAnime(it) }
+        com.example.data.api.AniListService.enrichAnimeCovers(fallback)
+    }
+
     private fun sanitizeAnimeDto(anime: ShikimoriAnimeDto): ShikimoriAnimeDto {
         val originalUrl = anime.image?.original ?: anime.image?.preview
         val resolvedRu = com.example.data.api.ShikimoriRussianTitles.resolveRussianTitle(
@@ -1557,6 +1589,193 @@ class AnimeRepository(context: Context) {
         )
     }
 
+    private fun getMockAnonsAnimes(): List<ShikimoriAnimeDto> {
+        return listOf(
+            ShikimoriAnimeDto(
+                id = 52807,
+                name = "One Punch Man 3",
+                russian = "Ванпанчмен 3",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154378-0k2P3q4W5e6r.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx154378-0k2P3q4W5e6r.jpg", null, null),
+                url = "/animes/52807",
+                kind = "tv",
+                score = "9.05",
+                status = "anons",
+                episodes = 12,
+                episodesAired = 0,
+                airedOn = "2026-10-18",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 57555,
+                name = "Chainsaw Man Movie: Reze-hen",
+                russian = "Человек-бензопила: Арка Резе",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx172463-m5N4b3v2c1x0.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx172463-m5N4b3v2c1x0.jpg", null, null),
+                url = "/animes/57555",
+                kind = "movie",
+                score = "9.15",
+                status = "anons",
+                episodes = 1,
+                episodesAired = 0,
+                airedOn = "2026-11-20",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 51535,
+                name = "Jujutsu Kaisen 3rd Season",
+                russian = "Магическая битва 3: Смертельная миграция",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146065-6q4H8d7yZ1uU.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx146065-6q4H8d7yZ1uU.jpg", null, null),
+                url = "/animes/51535",
+                kind = "tv",
+                score = "9.10",
+                status = "anons",
+                episodes = 24,
+                episodesAired = 0,
+                airedOn = "2026-12-05",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 56784,
+                name = "Enen no Shouboutai: San no Shou",
+                russian = "Пламенная бригада пожарных 3",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166614-7L9k7D3r1f2e.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166614-7L9k7D3r1f2e.jpg", null, null),
+                url = "/animes/56784",
+                kind = "tv",
+                score = "8.65",
+                status = "anons",
+                episodes = 24,
+                episodesAired = 0,
+                airedOn = "2026-10-10",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 58567,
+                name = "Dr. Stone: Science Future",
+                russian = "Доктор Стоун: Научное будущее — Часть 2",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx176496-9BDMjAZGEbq4.png", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx176496-9BDMjAZGEbq4.png", null, null),
+                url = "/animes/58567",
+                kind = "tv",
+                score = "8.80",
+                status = "anons",
+                episodes = 12,
+                episodesAired = 0,
+                airedOn = "2026-10-15",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 54857,
+                name = "Bleach: Sennen Kessen-hen - Soukoku-tan",
+                russian = "Блич: Тысячелетняя кровавая война — Часть 4",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163134-yieRFbvUOH9a.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163134-yieRFbvUOH9a.jpg", null, null),
+                url = "/animes/54857",
+                kind = "tv",
+                score = "9.20",
+                status = "anons",
+                episodes = 13,
+                episodesAired = 0,
+                airedOn = "2026-11-01",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 54900,
+                name = "Dorohedoro 2nd Season",
+                russian = "Дорохедоро 2",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163270-1w2e3r4t5y6u.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx163270-1w2e3r4t5y6u.jpg", null, null),
+                url = "/animes/54900",
+                kind = "tv",
+                score = "8.75",
+                status = "anons",
+                episodes = 12,
+                episodesAired = 0,
+                airedOn = "2026-12-15",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 55701,
+                name = "Tokyo Revengers: Santen Kessensha-hen",
+                russian = "Токийские мстители: Битва трех небожителей",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166240-a1b2c3d4e5f6.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx166240-a1b2c3d4e5f6.jpg", null, null),
+                url = "/animes/55701",
+                kind = "tv",
+                score = "8.50",
+                status = "anons",
+                episodes = 13,
+                episodesAired = 0,
+                airedOn = "2027-01-10",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 59787,
+                name = "Gachiakuta",
+                russian = "Гачиакута",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx180894-o3pz4DWFm3je.png", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx180894-o3pz4DWFm3je.png", null, null),
+                url = "/animes/59787",
+                kind = "tv",
+                score = "8.60",
+                status = "anons",
+                episodes = 12,
+                episodesAired = 0,
+                airedOn = "2026-10-25",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 60071,
+                name = "Tongari Boushi no Atelier",
+                russian = "Ателье колдовских колпаков",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx182771-KVq712ii32fJ.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx182771-KVq712ii32fJ.jpg", null, null),
+                url = "/animes/60071",
+                kind = "tv",
+                score = "8.85",
+                status = "anons",
+                episodes = 12,
+                episodesAired = 0,
+                airedOn = "2026-11-15",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 60509,
+                name = "Lazarus",
+                russian = "Лазарь",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b180738-1EaQ9g5BwBhy.jpg", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b180738-1EaQ9g5BwBhy.jpg", null, null),
+                url = "/animes/60509",
+                kind = "tv",
+                score = "8.90",
+                status = "anons",
+                episodes = 13,
+                episodesAired = 0,
+                airedOn = "2026-10-20",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 60810,
+                name = "Spy x Family Season 3",
+                russian = "Семья шпиона 3",
+                image = com.example.data.api.models.ShikimoriImageDto("https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx186333-32qDHxLkndpg.png", "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx186333-32qDHxLkndpg.png", null, null),
+                url = "/animes/60810",
+                kind = "tv",
+                score = "8.70",
+                status = "anons",
+                episodes = 12,
+                episodesAired = 0,
+                airedOn = "2027-01-15",
+                releasedOn = null
+            ),
+            ShikimoriAnimeDto(
+                id = 58505,
+                name = "Oshi no Ko 3rd Season",
+                russian = "Звездное дитя 3",
+                image = com.example.data.api.models.ShikimoriImageDto("https://static.yani.tv/posters/full/1636909023.jpg", "https://static.yani.tv/posters/full/1636909023.jpg", null, null),
+                url = "/animes/58505",
+                kind = "tv",
+                score = "8.95",
+                status = "anons",
+                episodes = 11,
+                episodesAired = 0,
+                airedOn = "2026-12-20",
+                releasedOn = null
+            )
+        )
+    }
+
     private fun getMockRecommendations(): List<ShikimoriAnimeDto> {
         return listOf(
             ShikimoriAnimeDto(
@@ -2466,16 +2685,7 @@ class AnimeRepository(context: Context) {
                 "https://shikimori.one/system/screenshots/original/b8a37b9a2b5e01e581f3313278a4e38bee9a1527.jpg?1696000681",
                 "https://shikimori.one/system/screenshots/original/97c36ca2cf3b2a249fa6b306b432a106f35b443a.jpg?1696000682"
             )
-            else -> listOf(
-                "https://shikimori.one/system/screenshots/original/2a672d805b38aaf2f9ea7831c8653309c66950b7.jpg?1727974804",
-                "https://shikimori.one/system/screenshots/original/97c36ca2cf3b2a249fa6b306b432a106f35b443a.jpg?1727974804",
-                "https://shikimori.one/system/screenshots/original/6bd6bcd45831dec851e029486d8b08bea5bd5615.jpg?1656089341",
-                "https://shikimori.one/system/screenshots/original/b8a37b9a2b5e01e581f3313278a4e38bee9a1527.jpg?1696000681",
-                "https://shikimori.one/system/screenshots/original/1670da24dad3715737aad0a57f5e8d1c9921a3a1.JPG?1682858917",
-                "https://shikimori.one/system/screenshots/original/f104d49d95f68b81ee655c65a7e6b0105b4b9b94.jpg?1704555020",
-                "https://shikimori.one/system/screenshots/original/310a02881106ec96e84f797e41679adb4030005f.jpg?1578634270",
-                "https://shikimori.one/system/screenshots/original/b44927f8a37910ff6aa945fc04df6b91c107be61.jpg?1665421010"
-            )
+            else -> emptyList()
         }
     }
 

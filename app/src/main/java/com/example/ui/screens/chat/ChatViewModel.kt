@@ -40,6 +40,13 @@ class ChatViewModel(
     init {
         repository.setActiveChatFriend(friendId)
 
+        viewModelScope.launch {
+            val myId = repository.getCurrentUserId()
+            if (myId.isNotBlank()) {
+                repository.startChatRealtime(myId, friendId)
+            }
+        }
+
         // 1. Initial cold history sync
         viewModelScope.launch {
             try {
@@ -72,6 +79,12 @@ class ChatViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        viewModelScope.launch {
+            val myId = repository.getCurrentUserId()
+            if (myId.isNotBlank()) {
+                repository.stopChatRealtime(myId, friendId)
+            }
+        }
         repository.clearActiveChatFriend(friendId)
     }
 

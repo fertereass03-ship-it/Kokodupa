@@ -4,6 +4,9 @@ import android.content.Context
 import com.example.data.db.AnimeDatabase
 import com.example.data.db.ChatMessageEntity
 import com.example.data.db.FriendEntity
+import com.example.data.realtime.RealtimeEvent
+import com.example.data.realtime.RealtimeSocialBus
+import com.example.data.realtime.RealtimeSocialManager
 import com.example.data.server.ServerDatabaseService
 import com.example.data.server.ServerUserProfile
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +29,7 @@ class SocialRepository(context: Context) {
     private val userAccountDao = database.userAccountDao()
     private val authRepository = AuthRepository(context)
     private val serverDatabaseService = ServerDatabaseService.getInstance(context)
+    private val realtimeSocialManager = RealtimeSocialManager.getInstance(context)
 
     companion object {
         @Volatile
@@ -45,6 +49,9 @@ class SocialRepository(context: Context) {
                     authRepository.activeUser.collectLatest { user ->
                         if (user != null && user.userId.isNotBlank()) {
                             val myId = user.userId
+
+                            // Real-time: Start Firestore snapshot & WebSocket listeners
+                            realtimeSocialManager.startUserListeners(myId)
 
                             // 1. Continuous real-time streaming connection for instant delivery (<50ms)
                             launch {
@@ -66,6 +73,8 @@ class SocialRepository(context: Context) {
                                     delay(2500)
                                 }
                             }
+                        } else {
+                            realtimeSocialManager.stopUserListeners()
                         }
                     }
                 }
@@ -75,12 +84,22 @@ class SocialRepository(context: Context) {
 
     fun setActiveChatFriend(friendId: String?) {
         activeChatFriendId = friendId
+        realtimeSocialManager.setActiveChatFriend(friendId)
     }
 
     fun clearActiveChatFriend(friendId: String) {
         if (activeChatFriendId == friendId) {
             activeChatFriendId = null
         }
+        realtimeSocialManager.clearActiveChatFriend(friendId)
+    }
+
+    fun startChatRealtime(myUserId: String, friendId: String) {
+        realtimeSocialManager.startChatListeners(myUserId, friendId)
+    }
+
+    fun stopChatRealtime(myUserId: String, friendId: String) {
+        realtimeSocialManager.stopChatListeners(myUserId, friendId)
     }
 
     val defaultUserId: String = "guest"
@@ -257,6 +276,17 @@ class SocialRepository(context: Context) {
         }
         serverDatabaseService.sendEvent(targetId, event)
 
+        // 4. Instant local event bus dispatch (0ms)
+        RealtimeSocialBus.emit(
+            RealtimeEvent.FriendRequest(
+                senderId = myId,
+                senderName = myUser.displayName,
+                senderAvatar = myUser.avatarUrl,
+                targetId = targetId,
+                timestamp = now
+            )
+        )
+
         true
     }
 
@@ -315,6 +345,17 @@ class SocialRepository(context: Context) {
         }
         serverDatabaseService.sendEvent(friendUserId, event)
 
+        // 4. Instant local event bus dispatch (0ms)
+        RealtimeSocialBus.emit(
+            RealtimeEvent.FriendAccepted(
+                senderId = myId,
+                senderName = myUser.displayName,
+                senderAvatar = myUser.avatarUrl,
+                targetId = friendUserId,
+                timestamp = now
+            )
+        )
+
         true
     }
 
@@ -335,6 +376,14 @@ class SocialRepository(context: Context) {
             put("targetId", friendUserId)
         }
         serverDatabaseService.sendEvent(friendUserId, event)
+
+        // Instant local event bus dispatch (0ms)
+        RealtimeSocialBus.emit(
+            RealtimeEvent.FriendDeclined(
+                senderId = myId,
+                targetId = friendUserId
+            )
+        )
 
         true
     }
@@ -590,6 +639,17 @@ class SocialRepository(context: Context) {
             put("timestamp", now)
         }
         serverDatabaseService.sendChatEvent(myId, friendId, msgEvent)
+
+        // Instant local event bus dispatch (0ms)
+        RealtimeSocialBus.emit(
+            RealtimeEvent.ChatMessage(
+                senderId = myId,
+                senderName = myUser.displayName,
+                targetId = friendId,
+                text = text,
+                timestamp = now
+            )
+        )
 
         // 4. Save remote message asynchronously in background - NEVER block sending!
         repoScope.launch {

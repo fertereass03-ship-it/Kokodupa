@@ -107,6 +107,129 @@ object AnimeEpisodeHelper {
     }
 
     /**
+     * Extracts upcoming year from date string or description text
+     */
+    fun extractYear(airedOn: String?, description: String? = null): Int? {
+        val y = airedOn?.take(4)?.toIntOrNull()
+        if (y != null) return y
+        if (!description.isNullOrBlank()) {
+            val match = Regex("""\b(202[6-9]|203[0-9])\b""").find(description)
+            if (match != null) {
+                return match.value.toIntOrNull()
+            }
+            val shortMatch = Regex("""\b(2[6-9])-м? году\b""", RegexOption.IGNORE_CASE).find(description)
+            if (shortMatch != null) {
+                val yy = shortMatch.groupValues[1].toIntOrNull()
+                if (yy != null) return 2000 + yy
+            }
+        }
+        return null
+    }
+
+    /**
+     * Checks if an anime is an unreleased announcement (anons)
+     */
+    fun isAnnouncement(
+        status: String?,
+        airedOn: String? = null,
+        releasedOn: String? = null,
+        year: Int? = null,
+        description: String? = null,
+        episodesAired: Int? = null
+    ): Boolean {
+        if (status?.contains("anons", ignoreCase = true) == true) return true
+        if (status?.contains("announced", ignoreCase = true) == true) return true
+        if (status?.contains("upcoming", ignoreCase = true) == true) return true
+        if (status?.contains("not_yet_aired", ignoreCase = true) == true) return true
+        if (status?.contains("unreleased", ignoreCase = true) == true) return true
+        if (year != null && year >= 2027) return true
+        val yearFromAired = airedOn?.take(4)?.toIntOrNull()
+        if (yearFromAired != null && yearFromAired >= 2027) return true
+        val yearFromReleased = releasedOn?.take(4)?.toIntOrNull()
+        if (yearFromReleased != null && yearFromReleased >= 2027) return true
+
+        val extracted = extractYear(airedOn, description)
+        if (extracted != null && extracted >= 2027) return true
+
+        if (!description.isNullOrBlank()) {
+            val lowerDesc = description.lowercase()
+            val mentionsFuture = lowerDesc.contains("2027") || lowerDesc.contains("2028") ||
+                    lowerDesc.contains("2029") || lowerDesc.contains("27-м") || lowerDesc.contains("27 году")
+            val mentionsRelease = lowerDesc.contains("выход") || lowerDesc.contains("выйдет") ||
+                    lowerDesc.contains("премьер") || lowerDesc.contains("анонс") ||
+                    lowerDesc.contains("релиз") || lowerDesc.contains("запланирован")
+            if (mentionsFuture && mentionsRelease && (episodesAired == null || episodesAired == 0)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun isAnnouncement(anime: ShikimoriAnimeDto): Boolean =
+        isAnnouncement(
+            status = anime.status,
+            airedOn = anime.airedOn,
+            releasedOn = anime.releasedOn,
+            episodesAired = anime.episodesAired
+        )
+
+    fun isAnnouncement(anime: ShikimoriAnimeDetailDto): Boolean =
+        isAnnouncement(
+            status = anime.status,
+            airedOn = anime.airedOn,
+            releasedOn = anime.releasedOn,
+            description = anime.description,
+            episodesAired = anime.episodesAired
+        )
+
+    /**
+     * Formats announcement release date in user-friendly text
+     */
+    fun formatAnnouncementDate(
+        airedOn: String?,
+        isUk: Boolean = AppSettingsManager.isUkrainian(),
+        description: String? = null
+    ): String {
+        val extractedYear = extractYear(airedOn, description)
+        val yearStr = extractedYear?.toString() ?: airedOn?.take(4)
+
+        return when {
+            !airedOn.isNullOrBlank() && airedOn.length >= 10 -> {
+                val parts = airedOn.split("-")
+                if (parts.size == 3) {
+                    val y = parts[0]
+                    val m = parts[1].toIntOrNull() ?: 1
+                    val d = parts[2].toIntOrNull() ?: 1
+                    val monthName = when (m) {
+                        1 -> if (isUk) "січня" else "января"
+                        2 -> if (isUk) "лютого" else "февраля"
+                        3 -> if (isUk) "березня" else "марта"
+                        4 -> if (isUk) "квітня" else "апреля"
+                        5 -> if (isUk) "травня" else "мая"
+                        6 -> if (isUk) "червня" else "июня"
+                        7 -> if (isUk) "липня" else "июля"
+                        8 -> if (isUk) "серпня" else "августа"
+                        9 -> if (isUk) "вересня" else "сентября"
+                        10 -> if (isUk) "жовтня" else "октября"
+                        11 -> if (isUk) "листопада" else "ноября"
+                        12 -> if (isUk) "грудня" else "декабря"
+                        else -> ""
+                    }
+                    if (isUk) "Вихід: $d $monthName $y р." else "Выход: $d $monthName $y г."
+                } else if (!yearStr.isNullOrBlank()) {
+                    if (isUk) "Очікується у $yearStr році" else "Ожидается в $yearStr году"
+                } else {
+                    if (isUk) "Анонс" else "Анонс"
+                }
+            }
+            !yearStr.isNullOrBlank() -> {
+                if (isUk) "Очікується у $yearStr році" else "Ожидается в $yearStr году"
+            }
+            else -> if (isUk) "Дата виходу уточнюється" else "Дата выхода уточняется"
+        }
+    }
+
+    /**
      * Resolves the best available episode info for a ShikimoriAnimeDto.
      */
     fun getEpisodeInfo(anime: ShikimoriAnimeDto, isUk: Boolean = AppSettingsManager.isUkrainian()): AnimeEpisodeInfo {
@@ -115,6 +238,7 @@ object AnimeEpisodeHelper {
             episodes = anime.episodes,
             episodesAired = anime.episodesAired,
             status = anime.status,
+            airedOn = anime.airedOn,
             isUk = isUk
         )
     }
@@ -128,6 +252,7 @@ object AnimeEpisodeHelper {
             episodes = anime.episodes,
             episodesAired = anime.episodesAired,
             status = anime.status,
+            airedOn = anime.airedOn,
             isUk = isUk
         )
     }
@@ -140,9 +265,19 @@ object AnimeEpisodeHelper {
         episodes: Int?,
         episodesAired: Int?,
         status: String?,
+        airedOn: String? = null,
         isUk: Boolean = AppSettingsManager.isUkrainian()
     ): AnimeEpisodeInfo {
-        val isAnonsStatus = status?.contains("anons", ignoreCase = true) == true
+        val isAnonsStatus = isAnnouncement(status, airedOn, episodesAired = episodesAired)
+        if (isAnonsStatus) {
+            return AnimeEpisodeInfo(
+                airedEpisodes = 0,
+                totalEpisodes = episodes,
+                isOngoing = false,
+                isAnons = true,
+                formattedText = formatAnnouncementDate(airedOn, isUk)
+            )
+        }
         val isOngoingStatus = status?.contains("ongoing", ignoreCase = true) == true
 
         // 1. Dynamic dubbing cache from Kodik player

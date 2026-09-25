@@ -112,7 +112,23 @@ fun AnimeCard(
     // Build resilient ordered candidate URLs so anime posters always load without failure
     val candidateUrls = remember(anime.id, posterUrl) {
         val list = mutableListOf<String>()
-        if (posterUrl.isNotBlank()) list.add(posterUrl)
+        if (posterUrl.isNotBlank() && !com.example.data.api.AniListService.isBrokenOr404(posterUrl)) {
+            list.add(posterUrl)
+        }
+        val orig = anime.image?.original
+        if (!orig.isNullOrBlank()) {
+            val resolved = AnimeRepository.resolveImageUrl(orig, anime.id, anime.name)
+            if (resolved.isNotBlank() && !com.example.data.api.AniListService.isBrokenOr404(resolved) && !list.contains(resolved)) {
+                list.add(resolved)
+            }
+        }
+        val prev = anime.image?.preview
+        if (!prev.isNullOrBlank()) {
+            val resolved = AnimeRepository.resolveImageUrl(prev, anime.id, anime.name)
+            if (resolved.isNotBlank() && !com.example.data.api.AniListService.isBrokenOr404(resolved) && !list.contains(resolved)) {
+                list.add(resolved)
+            }
+        }
         if (anime.id > 0) {
             val shikiOrig = "https://shikimori.io/system/animes/original/${anime.id}.jpg"
             val shikiPrev = "https://shikimori.io/system/animes/preview/${anime.id}.jpg"
@@ -120,16 +136,6 @@ fun AnimeCard(
             if (!list.contains(shikiOrig)) list.add(shikiOrig)
             if (!list.contains(shikiPrev)) list.add(shikiPrev)
             if (!list.contains(shikiDesu)) list.add(shikiDesu)
-        }
-        val orig = anime.image?.original
-        if (!orig.isNullOrBlank()) {
-            val resolved = AnimeRepository.resolveImageUrl(orig, anime.id, anime.name)
-            if (resolved.isNotBlank() && !list.contains(resolved)) list.add(resolved)
-        }
-        val prev = anime.image?.preview
-        if (!prev.isNullOrBlank()) {
-            val resolved = AnimeRepository.resolveImageUrl(prev, anime.id, anime.name)
-            if (resolved.isNotBlank() && !list.contains(resolved)) list.add(resolved)
         }
         list
     }
@@ -139,6 +145,7 @@ fun AnimeCard(
 
     val displayName = AnimeTitleHelper.getLocalizedTitle(anime.id, anime.russian, anime.name)
     val isUk = AppSettingsManager.isUkrainian()
+    val isAnons = AnimeEpisodeHelper.isAnnouncement(anime)
     val scoreText = anime.score?.takeIf { it.isNotBlank() && it != "0.0" } ?: "—"
     val kindText = when (anime.kind?.lowercase()) {
         "tv" -> "TV"
@@ -230,32 +237,52 @@ fun AnimeCard(
                     }
                 }
 
-                // Top-right rating badge
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .background(
-                            color = Color(0xDD0B0B0B),
-                            shape = RoundedCornerShape(6.dp)
-                        )
-                        .border(0.5.dp, Color(0x44FFC400), RoundedCornerShape(6.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Рейтинг",
-                            tint = RatingGold,
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Spacer(modifier = Modifier.width(3.dp))
+                // Top-right rating badge or Announcement badge
+                if (isAnons) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .background(
+                                brush = Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400))),
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
                         Text(
-                            text = scoreText,
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            text = if (isUk) "Анонс" else "Анонс",
+                            color = Color.Black,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.ExtraBold
                         )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .background(
+                                color = Color(0xDD0B0B0B),
+                                shape = RoundedCornerShape(6.dp)
+                            )
+                            .border(0.5.dp, Color(0x44FFC400), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Рейтинг",
+                                tint = RatingGold,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = scoreText,
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
 
@@ -412,25 +439,35 @@ fun AnimeCard(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = yearText,
-                        fontSize = 11.sp,
-                        color = colors.textSecondary
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (episodesText.isNotBlank()) {
+                    if (isAnons) {
                         Text(
-                            text = episodesText,
+                            text = episodesText.ifBlank { if (isUk) "Анонс" else "Анонс" },
                             fontSize = 11.sp,
-                            color = if (epInfo.isOngoing && epInfo.airedEpisodes != null && (epInfo.totalEpisodes == null || epInfo.airedEpisodes < epInfo.totalEpisodes)) {
-                                Color(0xFF00E676)
-                            } else {
-                                colors.textMuted
-                            },
-                            fontWeight = if (epInfo.isOngoing) FontWeight.SemiBold else FontWeight.Normal,
+                            color = Color(0xFFFFB300),
+                            fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+                    } else {
+                        Text(
+                            text = yearText,
+                            fontSize = 11.sp,
+                            color = colors.textSecondary
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (episodesText.isNotBlank()) {
+                            Text(
+                                text = episodesText,
+                                fontSize = 11.sp,
+                                color = when {
+                                    epInfo.isOngoing && epInfo.airedEpisodes != null && (epInfo.totalEpisodes == null || epInfo.airedEpisodes < epInfo.totalEpisodes) -> Color(0xFF00E676)
+                                    else -> colors.textMuted
+                                },
+                                fontWeight = if (epInfo.isOngoing) FontWeight.Bold else FontWeight.Normal,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }

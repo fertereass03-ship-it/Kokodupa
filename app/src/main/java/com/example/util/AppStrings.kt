@@ -84,6 +84,7 @@ object AppStrings {
     val filterNew: String get() = "Новинки"
     val filterPopular: String get() = if (isUa) "Популярне" else "Популярное"
     val filterRecommendations: String get() = if (isUa) "Рекомендації" else "Рекомендации"
+    val filterAnons: String get() = if (isUa) "Анонси" else "Анонсы"
     val filterUnwatched: String get() = if (isUa) "Не переглянуто" else "Не просмотрено"
     val filterWatched: String get() = if (isUa) "Переглянуто" else "Просмотрено"
     val filterWatching: String get() = if (isUa) "Дивлюся" else "Смотрю"

@@ -24,7 +24,8 @@ data class YaniAnimeItem(
     val score: String,
     val type: String?,
     val episodesCount: Int?,
-    val episodesAired: Int?
+    val episodesAired: Int?,
+    val isAnons: Boolean = false
 )
 
 object YaniCatalogService {
@@ -259,6 +260,15 @@ object YaniCatalogService {
                 val epCount = epObj?.optInt("count", 0)?.takeIf { it > 0 }
                 val epAired = epObj?.optInt("aired", 0)?.takeIf { it > 0 }
 
+                val statusObj = obj.optJSONObject("anime_status")
+                val statusAlias = statusObj?.optString("alias", "") ?: ""
+                val statusTitle = statusObj?.optString("title", "") ?: ""
+                val isAnonsYear = year != null && year > 2026
+                val isAnonsDetected = isAnonsYear ||
+                    statusAlias.contains("anons", ignoreCase = true) ||
+                    statusAlias.contains("announced", ignoreCase = true) ||
+                    statusTitle.contains("анонс", ignoreCase = true)
+
                 if (animeId > 0 && title.isNotBlank() && rawPoster.isNotBlank()) {
                     list.add(
                         YaniAnimeItem(
@@ -270,10 +280,11 @@ object YaniCatalogService {
                             shikimoriId = shikiId,
                             myanimelistId = malId,
                             kinopoiskId = kpId,
-                            score = scoreStr,
+                            score = if (isAnonsDetected) "" else scoreStr,
                             type = kind,
                             episodesCount = epCount,
-                            episodesAired = epAired
+                            episodesAired = if (isAnonsDetected) 0 else epAired,
+                            isAnons = isAnonsDetected
                         )
                     )
                 }
@@ -304,6 +315,12 @@ object YaniCatalogService {
             "special" -> "special"
             else -> "tv"
         }
+        val isAnonsItem = isAnons || (year != null && year > 2026)
+        val resolvedStatus = if (isAnonsItem) "anons" else "released"
+        val resolvedScore = if (isAnonsItem) null else score.takeIf { it.isNotBlank() }
+        val resolvedEpisodes = if (isAnonsItem) episodesCount else (episodesCount ?: 12)
+        val resolvedAired = if (isAnonsItem) 0 else (episodesAired ?: episodesCount ?: 12)
+
         return ShikimoriAnimeDto(
             id = targetId,
             name = title,
@@ -311,10 +328,10 @@ object YaniCatalogService {
             image = img,
             url = "/animes/$targetId",
             kind = normalizedKind,
-            score = score,
-            status = "released",
-            episodes = episodesCount ?: 12,
-            episodesAired = episodesAired ?: episodesCount ?: 12,
+            score = resolvedScore,
+            status = resolvedStatus,
+            episodes = resolvedEpisodes,
+            episodesAired = resolvedAired,
             airedOn = year?.toString() ?: "2026",
             releasedOn = year?.toString() ?: "2026"
         )
@@ -338,16 +355,22 @@ object YaniCatalogService {
             "special" -> "special"
             else -> "tv"
         }
+        val isAnonsItem = isAnons || (year != null && year > 2026)
+        val resolvedStatus = if (isAnonsItem) "anons" else "released"
+        val resolvedScore = if (isAnonsItem) null else score.takeIf { it.isNotBlank() }
+        val resolvedEpisodes = if (isAnonsItem) episodesCount else (episodesCount ?: 12)
+        val resolvedAired = if (isAnonsItem) 0 else (episodesAired ?: episodesCount ?: 12)
+
         return ShikimoriAnimeDetailDto(
             id = targetId,
             name = title,
             russian = title,
             image = img,
             kind = normalizedKind,
-            score = score,
-            status = "released",
-            episodes = episodesCount ?: 12,
-            episodesAired = episodesAired ?: episodesCount ?: 12,
+            score = resolvedScore,
+            status = resolvedStatus,
+            episodes = resolvedEpisodes,
+            episodesAired = resolvedAired,
             airedOn = year?.toString() ?: "2026",
             releasedOn = year?.toString() ?: "2026",
             rating = "r",

@@ -41,6 +41,23 @@ class VoiceAndEpisodeViewModel(
             try {
                 val anime = repository.getAnimeDetails(animeId)
                 val isMovie = anime.kind == "movie" || (anime.episodes ?: 0) == 1
+
+                if (com.example.data.api.AnimeEpisodeHelper.isAnnouncement(anime)) {
+                    val isUk = com.example.data.settings.AppSettingsManager.isUkrainian()
+                    val dateText = com.example.data.api.AnimeEpisodeHelper.formatAnnouncementDate(anime.airedOn, isUk, anime.description)
+                    val msg = if (isUk) "Це аніме ще не вийшло (Анонс). $dateText" else "Это аниме ещё не вышло (Анонс). $dateText"
+                    _uiState.value = VoiceAndEpisodeUiState(
+                        isLoading = false,
+                        anime = anime,
+                        isMovie = isMovie,
+                        voices = emptyList(),
+                        selectedVoice = null,
+                        episodes = emptyList(),
+                        errorMessage = msg
+                    )
+                    return@launch
+                }
+
                 val searchTitle = anime.russian ?: anime.name
                 val voices = repository.getVoiceTranslations(animeId, searchTitle, isMovie = isMovie)
                 val lastVoice = repository.getLastWatchedVoice(animeId)

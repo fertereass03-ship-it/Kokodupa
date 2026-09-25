@@ -294,9 +294,8 @@ fun FriendsScreen(
             ) {
                 Card(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, colors.glassBorder, RoundedCornerShape(28.dp)),
-                    shape = RoundedCornerShape(28.dp),
+                        .fillMaxWidth(),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = colors.surface)
                 ) {
                     Column(
@@ -310,8 +309,7 @@ fun FriendsScreen(
                             modifier = Modifier
                                 .size(76.dp)
                                 .clip(CircleShape)
-                                .background(colors.primary.copy(alpha = 0.15f))
-                                .border(1.5.dp, colors.primary, CircleShape),
+                                .background(colors.primary.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -555,29 +553,13 @@ private fun FilterTabChip(
 ) {
     val colors = LocalAppColors.current
 
-    val bgColor = when {
-        isSelected -> colors.primary
-        isHighlighted -> colors.primary.copy(alpha = 0.15f)
-        else -> colors.surface
-    }
-
-    val contentColor = when {
-        isSelected -> Color.Black
-        isHighlighted -> colors.primary
-        else -> colors.textSecondary
-    }
-
-    val borderColor = when {
-        isSelected -> colors.primary
-        isHighlighted -> colors.primary.copy(alpha = 0.5f)
-        else -> colors.glassBorder
-    }
+    val bgColor = if (isSelected) colors.primary else colors.surfaceVariant.copy(alpha = 0.6f)
+    val contentColor = if (isSelected) Color.Black else colors.textSecondary
 
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(20.dp))
             .clickable { onClick() }
             .padding(horizontal = 14.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -595,7 +577,7 @@ private fun FilterTabChip(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(
-                    if (isSelected) Color.Black.copy(alpha = 0.18f) else colors.surfaceVariant
+                    if (isSelected) Color.Black.copy(alpha = 0.15f) else colors.surface.copy(alpha = 0.8f)
                 )
                 .padding(horizontal = 6.dp, vertical = 1.dp)
         ) {
@@ -621,10 +603,9 @@ private fun IncomingRequestCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .border(1.dp, colors.primary.copy(alpha = 0.4f), RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(16.dp))
             .testTag("incoming_request_${request.userId}"),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Row(
@@ -633,29 +614,18 @@ private fun IncomingRequestCard(
                 .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(50.dp)) {
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .background(colors.surfaceVariant)
-                        .border(1.5.dp, colors.primary.copy(alpha = 0.7f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    UserAvatar(
-                        avatarUrl = request.avatarUrl,
-                        modifier = Modifier.fillMaxSize(),
-                        contentDescription = request.name,
-                        showVideoBadge = false
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(13.dp)
-                        .align(Alignment.BottomEnd)
-                        .background(Color(0xFF4CAF50), CircleShape)
-                        .border(2.dp, colors.surface, CircleShape)
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(CircleShape)
+                    .background(colors.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                UserAvatar(
+                    avatarUrl = request.avatarUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = request.name,
+                    showVideoBadge = false
                 )
             }
 
@@ -666,7 +636,8 @@ private fun IncomingRequestCard(
                     text = request.name,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
+                        color = colors.textPrimary,
+                        fontSize = 15.sp
                     )
                 )
                 Text(
@@ -691,7 +662,7 @@ private fun IncomingRequestCard(
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                     modifier = Modifier
-                        .height(38.dp)
+                        .height(36.dp)
                         .testTag("accept_request_${request.userId}")
                 ) {
                     Icon(imageVector = Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -703,7 +674,7 @@ private fun IncomingRequestCard(
                 IconButton(
                     onClick = onDecline,
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(36.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color(0xFFFF5252).copy(alpha = 0.12f))
                         .testTag("decline_request_${request.userId}")
@@ -712,7 +683,7 @@ private fun IncomingRequestCard(
                         imageVector = Icons.Default.Close,
                         contentDescription = if (isUk) "Відхилити" else "Отклонить",
                         tint = Color(0xFFFF5252),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(17.dp)
                     )
                 }
             }
@@ -733,7 +704,6 @@ private fun OutgoingRequestCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .border(1.dp, colors.glassBorder, RoundedCornerShape(16.dp))
             .testTag("outgoing_request_${request.userId}"),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colors.surface)
@@ -748,8 +718,7 @@ private fun OutgoingRequestCard(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(colors.surfaceVariant)
-                    .border(1.dp, colors.glassBorder, CircleShape),
+                    .background(colors.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 UserAvatar(
@@ -767,7 +736,8 @@ private fun OutgoingRequestCard(
                     text = request.name,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
+                        color = colors.textPrimary,
+                        fontSize = 14.sp
                     )
                 )
                 Text(
@@ -794,14 +764,17 @@ private fun OutgoingRequestCard(
                 }
 
                 // Cancel Request
-                OutlinedButton(
+                Button(
                     onClick = onCancel,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colors.surfaceVariant,
+                        contentColor = colors.textSecondary
+                    ),
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                     modifier = Modifier
                         .height(36.dp)
-                        .testTag("cancel_request_${request.userId}"),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, colors.glassBorder)
+                        .testTag("cancel_request_${request.userId}")
                 ) {
                     Text(
                         text = if (isUk) "Скасувати" else "Отменить",
@@ -815,11 +788,11 @@ private fun OutgoingRequestCard(
 }
 
 /**
- * Modernized Friend Item Card with:
- * - Theme-adaptive styling (blends with light/dark seamlessly)
- * - Online / Offline indicator badge
+ * Modernized Friend Item Card:
+ * - Theme-adaptive sleek styling
+ * - Clean online status dot
  * - Quick Chat action
- * - Beautiful, modern soft-danger Delete button
+ * - Minimalist, modern soft delete button
  */
 @Composable
 private fun FriendListItem(
@@ -836,27 +809,25 @@ private fun FriendListItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(18.dp))
-            .border(1.dp, colors.glassBorder, RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(16.dp))
             .clickable { onChatClick() }
             .testTag("friend_item_${friend.userId}"),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = colors.surface)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Friend Avatar with Online / Offline indicator
-            Box(modifier = Modifier.size(52.dp)) {
+            Box(modifier = Modifier.size(46.dp)) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(46.dp)
                         .clip(CircleShape)
-                        .background(colors.surfaceVariant)
-                        .border(1.5.dp, colors.primary.copy(alpha = 0.6f), CircleShape),
+                        .background(colors.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     UserAvatar(
@@ -870,13 +841,12 @@ private fun FriendListItem(
                 // Online/Offline status dot
                 Box(
                     modifier = Modifier
-                        .size(14.dp)
+                        .size(10.dp)
                         .align(Alignment.BottomEnd)
                         .background(
                             if (isOnline) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
                             CircleShape
                         )
-                        .border(2.dp, colors.surface, CircleShape)
                 )
             }
 
@@ -889,7 +859,9 @@ private fun FriendListItem(
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary,
                         fontSize = 15.sp
-                    )
+                    ),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(3.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -917,7 +889,7 @@ private fun FriendListItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "•  ID: ${friend.userId}",
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         color = colors.textMuted
                     )
                 }
@@ -927,40 +899,57 @@ private fun FriendListItem(
             IconButton(
                 onClick = onChatClick,
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(colors.primary.copy(alpha = 0.15f))
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(colors.primary.copy(alpha = 0.12f))
                     .testTag("chat_friend_${friend.userId}")
             ) {
                 Icon(
                     imageVector = Icons.Default.Chat,
                     contentDescription = if (isUk) "Чат" else "Чат",
                     tint = colors.primary,
-                    modifier = Modifier.size(19.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
 
-            // Modern, Sleek Delete Button ("кнопка видалення")
+            // Delete Friend Button
             IconButton(
                 onClick = onDeleteClick,
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFFF5252).copy(alpha = 0.10f))
-                    .border(
-                        1.dp,
-                        Color(0xFFFF5252).copy(alpha = 0.25f),
-                        RoundedCornerShape(12.dp)
-                    )
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFFF5252).copy(alpha = 0.08f))
                     .testTag("delete_friend_${friend.userId}")
             ) {
                 Icon(
                     imageVector = Icons.Default.DeleteOutline,
                     contentDescription = if (isUk) "Видалити друга" else "Удалить друга",
-                    tint = Color(0xFFFF5252),
-                    modifier = Modifier.size(19.dp)
+                    tint = Color(0xFFFF5252).copy(alpha = 0.85f),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            // Delete Friend Button
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFFF5252).copy(alpha = 0.08f))
+                    .testTag("delete_friend_${friend.userId}")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DeleteOutline,
+                    contentDescription = if (isUk) "Видалити друга" else "Удалить друга",
+                    tint = Color(0xFFFF5252).copy(alpha = 0.85f),
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
@@ -1026,8 +1015,7 @@ private fun AddFriendBottomSheet(
                             Brush.linearGradient(
                                 listOf(colors.primary.copy(alpha = 0.25f), colors.primary.copy(alpha = 0.08f))
                             )
-                        )
-                        .border(1.dp, colors.primary.copy(alpha = 0.5f), RoundedCornerShape(14.dp)),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -1065,7 +1053,6 @@ private fun AddFriendBottomSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
                         .background(colors.surfaceVariant.copy(alpha = 0.55f))
-                        .border(1.dp, colors.glassBorder, RoundedCornerShape(14.dp))
                         .clickable {
                             clipboardManager.setText(AnnotatedString(currentUserId))
                             Toast.makeText(
@@ -1168,11 +1155,6 @@ private fun AddFriendBottomSheet(
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .border(
-                            1.dp,
-                            if (query.isNotBlank()) colors.primary.copy(alpha = 0.7f) else colors.glassBorder,
-                            RoundedCornerShape(14.dp)
-                        )
                         .testTag("friend_id_input")
                 )
 
@@ -1214,7 +1196,6 @@ private fun AddFriendBottomSheet(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
                         .background(AccentOrange.copy(alpha = 0.12f))
-                        .border(1.dp, AccentOrange.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
                     Text(
@@ -1239,7 +1220,6 @@ private fun AddFriendBottomSheet(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(1.5.dp, colors.primary.copy(alpha = 0.45f), RoundedCornerShape(20.dp))
                         .testTag("friend_search_result_card"),
                     colors = CardDefaults.cardColors(containerColor = colors.surfaceVariant.copy(alpha = 0.85f)),
                     shape = RoundedCornerShape(20.dp)

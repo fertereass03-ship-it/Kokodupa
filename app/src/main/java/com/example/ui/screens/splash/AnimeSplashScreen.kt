@@ -180,7 +180,7 @@ fun AnimeSplashScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(bottom = 40.dp)
         ) {
-            // App Logo Squircle filled edge-to-edge with the emblem
+            // App Logo Squircle filled edge-to-edge with the official app launcher icon
             Box(
                 modifier = Modifier
                     .scale(logoScale.value * pulseScale)
@@ -197,8 +197,8 @@ fun AnimeSplashScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.ic_anime_launch_emblem),
-                    contentDescription = "ANIWERTI Emblem",
+                    painter = painterResource(id = R.drawable.ic_aniwerti_app_icon),
+                    contentDescription = "ANIWERTI App Icon",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )

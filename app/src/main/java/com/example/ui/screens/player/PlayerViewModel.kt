@@ -171,6 +171,16 @@ class PlayerViewModel(
         viewModelScope.launch {
             val settings = settingsRepository.getPlayerSettingsDirect()
             val anime = animeRepository.getAnimeDetails(animeId)
+            if (com.example.data.api.AnimeEpisodeHelper.isAnnouncement(anime)) {
+                val isUk = com.example.data.settings.AppSettingsManager.isUkrainian()
+                val dateText = com.example.data.api.AnimeEpisodeHelper.formatAnnouncementDate(anime.airedOn, isUk, anime.description)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isPlaying = false,
+                    errorMessage = if (isUk) "Це аніме ще не вийшло (Анонс). $dateText" else "Это аниме ещё не вышло (Анонс). $dateText"
+                )
+                return@launch
+            }
             val isMovie = anime.kind == "movie" || (anime.episodes ?: 0) == 1
             animePosterUrl = AnimeRepository.resolveImageUrl(
                 anime.image?.original ?: anime.image?.preview,

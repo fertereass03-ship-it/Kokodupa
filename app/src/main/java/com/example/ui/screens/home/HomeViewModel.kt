@@ -7,6 +7,8 @@ import com.example.data.api.models.ShikimoriAnimeDto
 import com.example.data.db.FavoriteCategory
 import com.example.data.db.WatchHistoryEntity
 import com.example.data.repository.AnimeRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,21 +48,32 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadHomeData() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
-                val banner = repository.getDailyBannerAnime()
-                val popular = repository.getPopularAnimes(30)
-                val new2026 = repository.get2026Releases(30)
-                val recs = repository.getRecommendations(30)
+                coroutineScope {
+                    val bannerDeferred = async { runCatching { repository.getDailyBannerAnime() }.getOrNull() }
+                    val popularDeferred = async { runCatching { repository.getPopularAnimes(30) }.getOrDefault(emptyList()) }
+                    val new2026Deferred = async { runCatching { repository.get2026Releases(30) }.getOrDefault(emptyList()) }
+                    val recsDeferred = async { runCatching { repository.getRecommendations(30) }.getOrDefault(emptyList()) }
 
-                _uiState.value = HomeUiState(
-                    isLoading = false,
-                    bannerAnime = banner,
-                    popularAnimes = popular,
-                    releases2026 = new2026,
-                    recommendations = recs,
-                    isBannerFavorite = false,
-                    errorMessage = null
-                )
+                    val banner = bannerDeferred.await()
+                    val popular = popularDeferred.await()
+                    val new2026 = new2026Deferred.await()
+                    val recs = recsDeferred.await()
+
+                    val effectiveBanner = banner ?: popular.firstOrNull() ?: new2026.firstOrNull()
+                    val hasData = effectiveBanner != null || popular.isNotEmpty() || new2026.isNotEmpty()
+
+                    _uiState.value = HomeUiState(
+                        isLoading = false,
+                        bannerAnime = effectiveBanner,
+                        popularAnimes = popular,
+                        releases2026 = new2026,
+                        recommendations = recs,
+                        isBannerFavorite = false,
+                        errorMessage = if (!hasData) "Не удалось загрузить данные. Проверьте подключение к сети." else null
+                    )
+                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,

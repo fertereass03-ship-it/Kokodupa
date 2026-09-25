@@ -349,32 +349,55 @@ fun CatalogScreen(
                     "ALL" to AppStrings.filterAll,
                     "NEW" to AppStrings.filterNew,
                     "POPULAR" to AppStrings.filterPopular,
-                    "RECOMMENDATIONS" to AppStrings.filterRecommendations
+                    "RECOMMENDATIONS" to AppStrings.filterRecommendations,
+                    "ANONS" to AppStrings.filterAnons
                 )
                 tabOptions.forEach { (key, label) ->
                     val isSelected = state.filter.selectedTab == key
+                    val isAnonsTab = key == "ANONS"
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isSelected) colors.primary else colors.surface
+                                if (isSelected) {
+                                    if (isAnonsTab) {
+                                        androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400)))
+                                    } else {
+                                        androidx.compose.ui.graphics.SolidColor(colors.primary)
+                                    }
+                                } else colors.surface
                             )
                             .border(
                                 1.dp,
-                                if (isSelected) colors.primary else colors.glassBorder,
+                                if (isSelected) {
+                                    if (isAnonsTab) Color(0xFFFF8F00) else colors.primary
+                                } else {
+                                    if (isAnonsTab) Color(0xFFFFB300).copy(alpha = 0.55f) else colors.glassBorder
+                                },
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { viewModel.selectTab(key) }
                             .padding(horizontal = 14.dp, vertical = 7.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = label,
-                            color = if (isSelected) Color.Black else colors.textSecondary,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            fontSize = 12.sp,
-                            maxLines = 1
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (isAnonsTab) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = if (isSelected) Color.Black else Color(0xFFFFB300),
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Spacer(modifier = Modifier.width(5.dp))
+                            }
+                            Text(
+                                text = label,
+                                color = if (isSelected) Color.Black else if (isAnonsTab) Color(0xFFFFB300) else colors.textSecondary,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 12.sp,
+                                maxLines = 1
+                            )
+                        }
                     }
                 }
             }
