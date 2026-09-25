@@ -75,7 +75,9 @@ class AnimeDetailViewModel(
                 val similarDeferred = async { repository.getSimilarAnime(animeId) }
 
                 val details = detailsDeferred.await()
-                val screenshots = screenshotsDeferred.await()
+                val isAnons = com.example.data.api.AnimeEpisodeHelper.isAnnouncement(details) ||
+                        details.status?.equals("anons", ignoreCase = true) == true
+                val screenshots = if (isAnons) emptyList() else screenshotsDeferred.await()
                 val similar = similarDeferred.await()
 
                 val title = details.russian?.takeIf { it.isNotBlank() } ?: details.name
@@ -99,7 +101,6 @@ class AnimeDetailViewModel(
                     }
                 }
 
-                val isAnons = com.example.data.api.AnimeEpisodeHelper.isAnnouncement(details)
                 if (!isAnons) {
                     val isMovie = details.kind == "movie" || (details.episodes ?: 0) == 1
                     viewModelScope.launch {

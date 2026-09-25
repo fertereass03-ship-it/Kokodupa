@@ -531,9 +531,9 @@ class SocialRepository(context: Context) {
             }
         } catch (_: Throwable) {}
 
-        // 2. Heavy cloud sync throttled to once every 40 seconds
+        // 2. High-speed cloud sync for incoming friend requests (<2.5s latency)
         val now = System.currentTimeMillis()
-        if (now - lastFullSyncTime > 40_000L) {
+        if (now - lastFullSyncTime > 2_500L) {
             lastFullSyncTime = now
 
             try {
@@ -690,6 +690,11 @@ class SocialRepository(context: Context) {
                     }
                 }
             }
+        } catch (_: Throwable) {}
+
+        // Instant cloud database history sync to ensure 100% reliable instant delivery without page refresh
+        try {
+            syncRemoteHistory(friendId)
         } catch (_: Throwable) {}
     }
 

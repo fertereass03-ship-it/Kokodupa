@@ -497,12 +497,12 @@ fun AnimeDetailScreen(
 
                         Spacer(modifier = Modifier.width(12.dp))
 
-                        // Title, dubbing info, and metadata strictly within poster bounds
+                        // Title, dubbing info, and metadata placed naturally closer together
                         Column(
                             modifier = Modifier
                                 .weight(1f)
                                 .height(152.dp),
-                            verticalArrangement = Arrangement.SpaceBetween
+                            verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom)
                         ) {
                             Column {
                                 Text(
@@ -540,19 +540,16 @@ fun AnimeDetailScreen(
                                     Box(
                                         modifier = Modifier
                                             .background(
-                                                brush = if (isAnons) {
-                                                    Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400)))
-                                                } else {
-                                                    Brush.horizontalGradient(listOf(Color(0xFFE65100), AccentOrange))
-                                                },
+                                                color = Color(0x1AFFFFFF),
                                                 shape = RoundedCornerShape(6.dp)
                                             )
-                                            .padding(horizontal = 7.dp, vertical = 2.5.dp)
+                                            .border(0.6.dp, Color(0x28FFFFFF), RoundedCornerShape(6.dp))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
                                         Text(
                                             text = status,
-                                            color = if (isAnons) Color.Black else Color.White,
-                                            fontWeight = FontWeight.Bold,
+                                            color = TextSecondary,
+                                            fontWeight = FontWeight.Medium,
                                             fontSize = 11.sp
                                         )
                                     }
@@ -613,15 +610,15 @@ fun AnimeDetailScreen(
 
                                         Box(
                                             modifier = Modifier
-                                                .background(Color(0xFF162A1B), RoundedCornerShape(6.dp))
-                                                .border(0.8.dp, Color(0xFF4CAF50), RoundedCornerShape(6.dp))
-                                                .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                                                .background(Color(0x14FFFFFF), RoundedCornerShape(6.dp))
+                                                .border(0.6.dp, Color(0x22FFFFFF), RoundedCornerShape(6.dp))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
                                         ) {
                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                 Icon(
                                                     imageVector = Icons.Default.Mic,
                                                     contentDescription = null,
-                                                    tint = Color(0xFF4CAF50),
+                                                    tint = TextMuted,
                                                     modifier = Modifier.size(11.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(3.dp))
@@ -631,8 +628,8 @@ fun AnimeDetailScreen(
                                                     } else {
                                                         "Озвучено: ${maxVoiceEp ?: actualAiredEp ?: "?"} эп."
                                                     },
-                                                    color = Color(0xFF81C784),
-                                                    fontWeight = FontWeight.ExtraBold,
+                                                    color = TextSecondary,
+                                                    fontWeight = FontWeight.Medium,
                                                     fontSize = 11.sp
                                                 )
                                             }
@@ -943,9 +940,10 @@ fun AnimeDetailScreen(
                 }
             }
 
-            // --- 5. Anime Screenshots Gallery or Not Found State ---
-            item {
-                Column(modifier = Modifier.padding(vertical = 10.dp)) {
+            // --- 5. Anime Screenshots Gallery (Only for regular anime, excluded for announcements) ---
+            if (!isAnons) {
+                item {
+                    Column(modifier = Modifier.padding(vertical = 10.dp)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1082,6 +1080,7 @@ fun AnimeDetailScreen(
                     }
                 }
             }
+        }
 
             // --- 6. Real Related Anime from Shikimori (Chronological order by year, expandable) ---
             if (state.relatedAnime.isNotEmpty()) {

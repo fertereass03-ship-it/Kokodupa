@@ -167,12 +167,8 @@ object YaniCatalogService {
             val norm = normalizeTitle(title)
             if (norm.isNotBlank()) {
                 yaniByTitle[norm]?.let { return it }
-                // Substring match
-                for ((k, v) in yaniByTitle) {
-                    if (k.contains(norm) || norm.contains(k)) {
-                        return v
-                    }
-                }
+                // Exact match only to avoid mixing up different seasons/releases of the same franchise
+                yaniByTitle[norm]?.let { return it }
             }
         }
         return null

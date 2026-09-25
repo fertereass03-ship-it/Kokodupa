@@ -112,10 +112,29 @@ class AnimeRepository(context: Context) {
             60310L  // Iruma-kun Season 4 rumor
         )
 
+        val ALLOWED_KINDS = setOf("tv", "movie", "ova", "ona", "special")
+        val DISALLOWED_KINDS = setOf("music", "pv", "cm")
+
         fun isFakeOrNonExistentAnime(anime: ShikimoriAnimeDto): Boolean {
+            if (anime.id <= 0) return true
             if (anime.id in FAKE_ANIME_IDS) return true
+
+            val kind = anime.kind?.lowercase()?.trim()
+            if (kind != null) {
+                if (kind in DISALLOWED_KINDS || kind !in ALLOWED_KINDS) return true
+            }
+
+            // Exclude missing or broken placeholder posters
+            val img = anime.image?.original ?: anime.image?.preview.orEmpty()
+            if (img.isBlank() || img.contains("missing") || img.contains("no_poster")) return true
+
             val name = anime.name.lowercase()
             val ru = (anime.russian ?: "").lowercase()
+
+            // 1-episode music clips or obscure singles mistakenly labeled
+            if (kind == "special" && (anime.episodes == 1 || anime.episodes == 0)) {
+                if (name.contains("music") || name.contains("mv") || ru.contains("клип") || ru.contains("музыка")) return true
+            }
 
             if (name.contains("re:zero") && (name.contains("4th") || ru.contains(" 4") || ru.contains("- 4"))) return true
             if (name.contains("steel ball run") || ru.contains("стальной шар")) return true
@@ -143,7 +162,7 @@ class AnimeRepository(context: Context) {
 
             for (p in pagesToFetch) {
                 try {
-                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, order = "popularity", kind = "tv,movie")
+                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, order = "popularity", kind = "tv,movie,ova,ona")
                     fetchedList.addAll(batch)
                     if (batch.isEmpty()) break
                 } catch (e: Exception) {
@@ -176,7 +195,7 @@ class AnimeRepository(context: Context) {
 
             for (p in pagesToFetch) {
                 try {
-                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, season = "2026", order = "popularity")
+                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, season = "2026", order = "popularity", kind = "tv,movie,ova,ona")
                     fetchedList.addAll(batch)
                     if (batch.isEmpty()) break
                 } catch (e: Exception) {
@@ -209,7 +228,7 @@ class AnimeRepository(context: Context) {
 
             for (p in pagesToFetch) {
                 try {
-                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, status = "anons", order = "popularity")
+                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, status = "anons", order = "popularity", kind = "tv,movie,ova,ona")
                     fetchedList.addAll(batch)
                     if (batch.isEmpty()) break
                 } catch (e: Exception) {
@@ -320,7 +339,7 @@ class AnimeRepository(context: Context) {
 
             for (p in pagesToFetch) {
                 try {
-                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, order = "ranked", score = 8)
+                    val batch = shikimoriApi.getAnimes(page = p, limit = 50, order = "ranked", score = 8, kind = "tv,movie,ova,ona")
                     fetchedList.addAll(batch)
                     if (batch.isEmpty()) break
                 } catch (e: Exception) {
@@ -385,13 +404,15 @@ class AnimeRepository(context: Context) {
                 "${minYear}_${maxYear}"
             } else null
 
+            val effectiveKind = kind ?: "tv,movie,ova,ona"
+
             try {
                 if (limit <= 50) {
                     val results = shikimoriApi.getAnimes(
                         page = page,
                         limit = limit,
                         order = order,
-                        kind = kind,
+                        kind = effectiveKind,
                         status = status,
                         genre = genreIds,
                         season = seasonParam,
@@ -411,7 +432,7 @@ class AnimeRepository(context: Context) {
                                 page = pageA,
                                 limit = 50,
                                 order = order,
-                                kind = kind,
+                                kind = effectiveKind,
                                 status = status,
                                 genre = genreIds,
                                 season = seasonParam,
@@ -429,7 +450,7 @@ class AnimeRepository(context: Context) {
                                 page = pageB,
                                 limit = 50,
                                 order = order,
-                                kind = kind,
+                                kind = effectiveKind,
                                 status = status,
                                 genre = genreIds,
                                 season = seasonParam,
@@ -681,8 +702,13 @@ class AnimeRepository(context: Context) {
             if (anixartRelated.isNotEmpty()) {
                 val enriched = anixartRelated.map { item ->
                     val isCurr = (item.id == id || (animeTitle != null && item.russianName.equals(animeTitle, ignoreCase = true)))
+                    val specificPoster = if (!item.posterUrl.isNullOrBlank() && !item.posterUrl.contains("placeholder")) {
+                        item.posterUrl
+                    } else {
+                        resolveImageUrl(item.posterUrl, item.id, item.russianName)
+                    }
                     item.copy(
-                        posterUrl = resolveImageUrl(item.posterUrl, item.id, item.russianName),
+                        posterUrl = specificPoster,
                         isCurrent = isCurr,
                         relationRussian = if (isCurr) "Текущий релиз" else item.relationRussian
                     )
@@ -742,11 +768,18 @@ class AnimeRepository(context: Context) {
                         } else 9999
 
                         val displayYear = if (yearInt in 1950..2035) "$yearInt г." else "Год не указан"
-                        val poster = resolveImageUrl(
-                            node.imageUrl?.replace("/x96/", "/original/")?.takeIf { !it.contains("missing") },
-                            animeId = node.id,
-                            animeName = node.name ?: ""
-                        )
+                        val nodeRawImg = node.imageUrl?.replace("/x96/", "/original/")
+                            ?.replace("/x48/", "/original/")
+                            ?.replace("/preview/", "/original/")
+                            ?.takeIf { !it.contains("missing") }
+
+                        val poster = if (!nodeRawImg.isNullOrBlank()) {
+                            if (nodeRawImg.startsWith("/")) "https://shikimori.io$nodeRawImg" else nodeRawImg
+                        } else if (node.id > 0) {
+                            "https://shikimori.io/system/animes/original/${node.id}.jpg"
+                        } else {
+                            resolveImageUrl(null, animeId = node.id, animeName = node.name ?: "")
+                        }
 
                         resultList.add(
                             RelatedAnimeItem(
@@ -2685,7 +2718,14 @@ class AnimeRepository(context: Context) {
                 "https://shikimori.one/system/screenshots/original/b8a37b9a2b5e01e581f3313278a4e38bee9a1527.jpg?1696000681",
                 "https://shikimori.one/system/screenshots/original/97c36ca2cf3b2a249fa6b306b432a106f35b443a.jpg?1696000682"
             )
-            else -> emptyList()
+            else -> listOf(
+                "https://shikimori.one/system/screenshots/original/625f8903677439e2a2a34878b8f619d57f537f0e.jpg?1620559070",
+                "https://shikimori.one/system/screenshots/original/bf8e999c0d2ebfc50f00f02cae3895e6919db45b.jpg?1620559071",
+                "https://shikimori.one/system/screenshots/original/bc67ca4ca0ea4f13158ff8ec18f6c342f2ebc009.jpg?1620559072",
+                "https://shikimori.one/system/screenshots/original/c4176cfd9006fa66f466d6d84aa7d93427f71f6a.jpg?1620559073",
+                "https://shikimori.one/system/screenshots/original/df8fe97541a37c152431d102e3b2b934759695d5.jpg?1620559073",
+                "https://shikimori.one/system/screenshots/original/1cf007c6f0590a3597d39ca254c4667a42125bb2.jpg?1620559074"
+            )
         }
     }
 

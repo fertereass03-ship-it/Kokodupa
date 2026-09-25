@@ -31,7 +31,7 @@ object AppStrings {
 
     val themeOriginal: String get() = if (isUa) "Оригінальна (ANIWERTI)" else "Оригинальная (ANIWERTI)"
     val themeLight: String get() = if (isUa) "Світла тема" else "Светлая тема"
-    val themeDark: String get() = if (isUa) "Глибока темна" else "Глубокая тёмная"
+    val themeDark: String get() = if (isUa) "Темно-фіолетова" else "Тёмно-фиолетовая"
 
     // Player Settings
     val autoSkipOpening: String get() = if (isUa) "Автопропуск опенінгів" else "Автопропуск опенингов"

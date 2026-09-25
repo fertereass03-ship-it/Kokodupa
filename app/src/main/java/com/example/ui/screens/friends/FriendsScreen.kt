@@ -257,30 +257,40 @@ fun FriendsScreen(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // Modern Add Friend Action Button
-            IconButton(
-                onClick = {
-                    if (activeUser != null) {
-                        viewModel.openAddDialog()
-                    } else {
-                        onNavigateToProfile()
-                    }
-                },
+            // Beautiful Add Friend Action Button
+            Box(
                 modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
-                        Brush.linearGradient(listOf(colors.primary, colors.secondary))
+                        Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400)))
                     )
-                    .shadow(elevation = 6.dp, shape = CircleShape, ambientColor = colors.primary)
-                    .testTag("add_friend_button")
+                    .border(1.dp, Color(0xFFFF8F00), RoundedCornerShape(12.dp))
+                    .clickable {
+                        if (activeUser != null) {
+                            viewModel.openAddDialog()
+                        } else {
+                            onNavigateToProfile()
+                        }
+                    }
+                    .padding(horizontal = 14.dp, vertical = 9.dp)
+                    .testTag("add_friend_button"),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.PersonAdd,
-                    contentDescription = if (isUk) "Додати друга" else "Добавить друга",
-                    tint = Color.Black,
-                    modifier = Modifier.size(22.dp)
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.PersonAdd,
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = if (isUk) "Додати друзів" else "Добавить друзей",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.5.sp
+                    )
+                }
             }
         }
 
@@ -492,16 +502,45 @@ fun FriendsScreen(
                                     colors = CardDefaults.cardColors(containerColor = colors.surface),
                                     border = androidx.compose.foundation.BorderStroke(1.dp, colors.glassBorder)
                                 ) {
-                                    Text(
-                                        text = if (isUk)
-                                            "Поки що немає підтверджених друзів. Коли друг прийме вашу заявку, він з'явиться тут і ви зможете відкрити чат!"
-                                        else
-                                            "Пока нет подтвержденных друзей. Когда друг примет вашу заявку, он появится здесь и вы сможете открыть чат!",
-                                        color = colors.textMuted,
-                                        fontSize = 13.sp,
-                                        lineHeight = 18.sp,
-                                        modifier = Modifier.padding(16.dp)
-                                    )
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text(
+                                            text = if (isUk)
+                                                "Поки що немає підтверджених друзів. Коли друг прийме вашу заявку, він з'явиться тут і ви зможете відкрити чат!"
+                                            else
+                                                "Пока нет подтвержденных друзей. Когда друг примет вашу заявку, он появится здесь и вы сможете открыть чат!",
+                                            color = colors.textMuted,
+                                            fontSize = 13.sp,
+                                            lineHeight = 18.sp
+                                        )
+                                        Spacer(modifier = Modifier.height(14.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .background(
+                                                    Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400)))
+                                                )
+                                                .clickable { viewModel.openAddDialog() }
+                                                .padding(horizontal = 16.dp, vertical = 9.dp)
+                                                .testTag("empty_state_add_friend_button"),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Icon(
+                                                    imageVector = Icons.Default.PersonAdd,
+                                                    contentDescription = null,
+                                                    tint = Color.Black,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text(
+                                                    text = if (isUk) "Знайти та додати друзів" else "Найти и добавить друзей",
+                                                    color = Color.Black,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 12.5.sp
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } else {
@@ -911,28 +950,6 @@ private fun FriendListItem(
                     modifier = Modifier.size(18.dp)
                 )
             }
-
-            Spacer(modifier = Modifier.width(6.dp))
-
-            // Delete Friend Button
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFFF5252).copy(alpha = 0.08f))
-                    .testTag("delete_friend_${friend.userId}")
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DeleteOutline,
-                    contentDescription = if (isUk) "Видалити друга" else "Удалить друга",
-                    tint = Color(0xFFFF5252).copy(alpha = 0.85f),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-    }
-}
 
             Spacer(modifier = Modifier.width(6.dp))
 

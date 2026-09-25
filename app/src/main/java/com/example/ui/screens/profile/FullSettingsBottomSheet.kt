@@ -325,7 +325,7 @@ fun FullSettingsBottomSheet(
                             val themeSubtitle = when (mode) {
                                 AppThemeMode.ORIGINAL_DARK -> if (AppSettingsManager.isUkrainian()) "Фірмовий темний стиль з неоновим золотом" else "Фирменный тёмный стиль с неоновым золотом"
                                 AppThemeMode.LIGHT -> if (AppSettingsManager.isUkrainian()) "Яскравий світлий інтерфейс" else "Яркий светлый интерфейс"
-                                AppThemeMode.DARK -> if (AppSettingsManager.isUkrainian()) "Глибокий чорний OLED стиль" else "Глубокий чёрный OLED стиль"
+                                AppThemeMode.DARK -> if (AppSettingsManager.isUkrainian()) "Елегантний темно-фіолетовий стиль" else "Элегантный тёмно-фиолетовый стиль"
                             }
 
                             Card(
@@ -361,7 +361,7 @@ fun FullSettingsBottomSheet(
                                                     when (mode) {
                                                         AppThemeMode.ORIGINAL_DARK -> PrimaryYellow
                                                         AppThemeMode.LIGHT -> Color(0xFFF7F8FA)
-                                                        AppThemeMode.DARK -> Color.Black
+                                                        AppThemeMode.DARK -> Color(0xFFBB86FC)
                                                     }
                                                 )
                                                 .border(1.dp, Color.Gray, CircleShape)

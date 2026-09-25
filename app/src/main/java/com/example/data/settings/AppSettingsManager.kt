@@ -14,7 +14,7 @@ enum class AppLanguage(val code: String, val displayName: String) {
 enum class AppThemeMode(val code: String, val titleUk: String, val titleRu: String) {
     ORIGINAL_DARK("original", "Оригінальна (ANIWERTI)", "Оригинальная (ANIWERTI)"),
     LIGHT("light", "Світла тема", "Светлая тема"),
-    DARK("dark", "Темна нічна тема", "Тёмная ночная тема")
+    DARK("dark", "Темно-фіолетова тема", "Тёмно-фиолетовая тема")
 }
 
 data class AppSettings(

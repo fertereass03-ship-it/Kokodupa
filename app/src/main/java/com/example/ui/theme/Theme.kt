@@ -62,23 +62,23 @@ private val OriginalDarkColors = darkColorScheme(
 )
 
 private val DeepDarkColors = darkColorScheme(
-    primary = DeepNightPrimary,
-    onPrimary = DeepNightBackground,
-    primaryContainer = DeepNightSurfaceVariant,
-    onPrimaryContainer = DeepNightPrimary,
-    secondary = AccentOrange,
-    onSecondary = DeepNightBackground,
-    secondaryContainer = DeepNightSurfaceVariant,
-    onSecondaryContainer = AccentOrange,
-    tertiary = DeepNightPrimary,
-    onTertiary = DeepNightBackground,
-    background = DeepNightBackground,
+    primary = DarkPurplePrimary,
+    onPrimary = DarkPurpleBackground,
+    primaryContainer = DarkPurpleSurfaceVariant,
+    onPrimaryContainer = DarkPurplePrimary,
+    secondary = DarkPurpleSecondary,
+    onSecondary = DarkPurpleBackground,
+    secondaryContainer = DarkPurpleSurfaceVariant,
+    onSecondaryContainer = DarkPurpleSecondary,
+    tertiary = DarkPurplePrimary,
+    onTertiary = DarkPurpleBackground,
+    background = DarkPurpleBackground,
     onBackground = TextPrimary,
-    surface = DeepNightSurfaceCard,
+    surface = DarkPurpleSurfaceCard,
     onSurface = TextPrimary,
-    surfaceVariant = DeepNightSurfaceVariant,
+    surfaceVariant = DarkPurpleSurfaceVariant,
     onSurfaceVariant = TextSecondary,
-    outline = GlassBorder,
+    outline = DarkPurpleGlassBorder,
     error = ErrorRed,
     onError = TextPrimary
 )
@@ -131,16 +131,16 @@ fun MyApplicationTheme(
             isLight = true
         )
         AppThemeMode.DARK -> AppCustomColors(
-            background = DeepNightBackground,
-            surface = DeepNightSurfaceCard,
-            surfaceVariant = DeepNightSurfaceVariant,
-            primary = DeepNightPrimary,
-            secondary = AccentOrange,
+            background = DarkPurpleBackground,
+            surface = DarkPurpleSurfaceCard,
+            surfaceVariant = DarkPurpleSurfaceVariant,
+            primary = DarkPurplePrimary,
+            secondary = DarkPurpleSecondary,
             textPrimary = TextPrimary,
-            textSecondary = TextSecondary,
-            textMuted = TextMuted,
-            glassBackground = Color(0xEE0D0D0D),
-            glassBorder = Color(0x33FFC400),
+            textSecondary = Color(0xFFC5B8DE),
+            textMuted = Color(0xFF8B7FA8),
+            glassBackground = DarkPurpleGlassBackground,
+            glassBorder = DarkPurpleGlassBorder,
             isLight = false
         )
         AppThemeMode.ORIGINAL_DARK -> AppCustomColors(

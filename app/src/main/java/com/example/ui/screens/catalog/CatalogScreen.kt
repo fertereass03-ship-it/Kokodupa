@@ -42,6 +42,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.animation.animateContentSize
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Star
@@ -345,54 +348,53 @@ fun CatalogScreen(
                     .padding(top = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val tabOptions = listOf(
-                    "ALL" to AppStrings.filterAll,
-                    "NEW" to AppStrings.filterNew,
-                    "POPULAR" to AppStrings.filterPopular,
-                    "RECOMMENDATIONS" to AppStrings.filterRecommendations,
-                    "ANONS" to AppStrings.filterAnons
+                data class CatalogTabItem(
+                    val key: String,
+                    val label: String,
+                    val icon: androidx.compose.ui.graphics.vector.ImageVector
                 )
-                tabOptions.forEach { (key, label) ->
-                    val isSelected = state.filter.selectedTab == key
-                    val isAnonsTab = key == "ANONS"
+                val tabOptions = listOf(
+                    CatalogTabItem("ALL", AppStrings.filterAll, Icons.Default.GridView),
+                    CatalogTabItem("POPULAR", AppStrings.filterPopular, Icons.Default.LocalFireDepartment),
+                    CatalogTabItem("NEW", AppStrings.filterNew, Icons.Default.NewReleases),
+                    CatalogTabItem("RECOMMENDATIONS", AppStrings.filterRecommendations, Icons.Default.AutoAwesome),
+                    CatalogTabItem("ANONS", AppStrings.filterAnons, Icons.Default.CalendarMonth)
+                )
+                tabOptions.forEach { tab ->
+                    val isSelected = state.filter.selectedTab == tab.key
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(
                                 if (isSelected) {
-                                    if (isAnonsTab) {
-                                        androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color(0xFFFF8F00), Color(0xFFFFC400)))
-                                    } else {
-                                        androidx.compose.ui.graphics.SolidColor(colors.primary)
-                                    }
-                                } else colors.surface
+                                    androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                        listOf(Color(0xFFFF8F00), Color(0xFFFFC400))
+                                    )
+                                } else {
+                                    androidx.compose.ui.graphics.SolidColor(colors.surface)
+                                }
                             )
                             .border(
                                 1.dp,
-                                if (isSelected) {
-                                    if (isAnonsTab) Color(0xFFFF8F00) else colors.primary
-                                } else {
-                                    if (isAnonsTab) Color(0xFFFFB300).copy(alpha = 0.55f) else colors.glassBorder
-                                },
+                                if (isSelected) Color(0xFFFF8F00) else Color(0xFFFFB300).copy(alpha = 0.55f),
                                 RoundedCornerShape(10.dp)
                             )
-                            .clickable { viewModel.selectTab(key) }
-                            .padding(horizontal = 14.dp, vertical = 7.dp),
+                            .clickable { viewModel.selectTab(tab.key) }
+                            .padding(horizontal = 14.dp, vertical = 7.dp)
+                            .testTag("catalog_tab_${tab.key.lowercase()}"),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (isAnonsTab) {
-                                Icon(
-                                    imageVector = Icons.Default.CalendarMonth,
-                                    contentDescription = null,
-                                    tint = if (isSelected) Color.Black else Color(0xFFFFB300),
-                                    modifier = Modifier.size(13.dp)
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                            }
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = null,
+                                tint = if (isSelected) Color.Black else Color(0xFFFFB300),
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
                             Text(
-                                text = label,
-                                color = if (isSelected) Color.Black else if (isAnonsTab) Color(0xFFFFB300) else colors.textSecondary,
+                                text = tab.label,
+                                color = if (isSelected) Color.Black else Color(0xFFFFB300),
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                 fontSize = 12.sp,
                                 maxLines = 1
@@ -441,12 +443,14 @@ fun CatalogScreen(
 
                 displayedAnimes.isEmpty() -> {
                     val subtitle = when {
-                        state.filter.selectedTab == "NEW" ->
-                            if (isUk) "Не вдалося завантажити новинки" else "Не удалось загрузить новинки"
                         state.filter.selectedTab == "POPULAR" ->
                             if (isUk) "Не вдалося завантажити популярне" else "Не удалось загрузить популярное"
                         state.filter.selectedTab == "RECOMMENDATIONS" ->
                             if (isUk) "Не вдалося завантажити рекомендації" else "Не удалось загрузить рекомендации"
+                        state.filter.selectedTab == "NEW" ->
+                            if (isUk) "Не вдалося завантажити новинки" else "Не удалось загрузить новинки"
+                        state.filter.selectedTab == "ANONS" ->
+                            if (isUk) "Не вдалося завантажити анонси" else "Не удалось загрузить анонсы"
                         state.filter.query.isNotBlank() && state.filter.selectedGenreIds.isNotEmpty() ->
                             if (isUk) "За запитом «${state.filter.query}» у вибраних жанрах нічого не знайдено"
                             else "По запросу «${state.filter.query}» в выбранных жанрах ничего не найдено"
@@ -1137,62 +1141,66 @@ private fun GenreSelectionDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (isSelected) PrimaryYellow.copy(alpha = 0.18f) else Color(0x15FFFFFF))
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(if (isSelected) PrimaryYellow.copy(alpha = 0.12f) else Color(0x0AFFFFFF))
                                 .border(
-                                    width = if (isSelected) 1.5.dp else 0.5.dp,
-                                    color = if (isSelected) PrimaryYellow else Color(0x22FFFFFF),
-                                    shape = RoundedCornerShape(10.dp)
+                                    width = if (isSelected) 1.dp else 0.5.dp,
+                                    color = if (isSelected) PrimaryYellow.copy(alpha = 0.65f) else Color(0x15FFFFFF),
+                                    shape = RoundedCornerShape(8.dp)
                                 )
                                 .clickable {
                                     val newSet = tempSelection.toMutableSet()
                                     if (isSelected) newSet.remove(genre.id) else newSet.add(genre.id)
                                     tempSelection = newSet
                                 }
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                                .padding(horizontal = 12.dp, vertical = 7.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = genreName,
                                     color = if (isSelected) PrimaryYellow else TextPrimary,
-                                    fontSize = 14.sp,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                    fontSize = 13.5.sp,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                                 )
                                 if (genre.name != genreName) {
                                     Text(
                                         text = genre.name,
                                         color = TextMuted,
-                                        fontSize = 11.sp
+                                        fontSize = 10.5.sp
                                     )
                                 }
                             }
 
-                            // Швидкий пошук саме цього одного жанру
-                            IconButton(
-                                onClick = { onApplyAndSearch(setOf(genre.id)) },
+                            // Minimalist, subtle quick search icon
+                            Box(
                                 modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(SurfaceVariantDark)
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .clickable { onApplyAndSearch(setOf(genre.id)) },
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = "Шукати цей жанр",
-                                    tint = PrimaryYellow,
-                                    modifier = Modifier.size(16.dp)
+                                    tint = TextMuted,
+                                    modifier = Modifier.size(12.dp)
                                 )
                             }
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
 
-                            // Індикатор вибору
+                            // Minimalist check indicator
                             Box(
                                 modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(if (isSelected) PrimaryYellow else SurfaceVariantDark)
-                                    .border(1.dp, if (isSelected) PrimaryYellow else Color(0x44FFFFFF), RoundedCornerShape(6.dp)),
+                                    .size(18.dp)
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .background(if (isSelected) PrimaryYellow else Color.Transparent)
+                                    .border(
+                                        1.dp,
+                                        if (isSelected) PrimaryYellow else Color(0x33FFFFFF),
+                                        RoundedCornerShape(5.dp)
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (isSelected) {
@@ -1200,7 +1208,7 @@ private fun GenreSelectionDialog(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = null,
                                         tint = Color.Black,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(12.dp)
                                     )
                                 }
                             }

@@ -722,6 +722,11 @@ object AniListService {
     ): String {
         val idKey = animeId?.toString()
 
+        // If rawUrl is already an authentic Anixart poster for a related release, preserve it directly!
+        if (!rawUrl.isNullOrBlank() && (rawUrl.contains("anixmirai.com") || rawUrl.contains("anixart") || rawUrl.contains("cdn.myanimelist.net") || rawUrl.contains("s4.anilist.co"))) {
+            return if (rawUrl.startsWith("//")) "https:$rawUrl" else rawUrl
+        }
+
         // If rawUrl is already a Yani poster, ensure https protocol and high quality
         if (!rawUrl.isNullOrBlank() && rawUrl.contains("static.yani.tv")) {
             var url = if (rawUrl.startsWith("//")) "https:$rawUrl" else rawUrl

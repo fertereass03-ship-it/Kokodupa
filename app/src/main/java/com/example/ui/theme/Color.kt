@@ -38,8 +38,17 @@ val LightAccentOrange = Color(0xFFEA580C)
 val LightGlassBackground = Color(0xEEFFFFFF)
 val LightGlassBorder = Color(0x33EA580C)
 
-// --- Pure Night Dark Theme Colors ---
-val DeepNightBackground = Color(0xFF000000)
-val DeepNightSurfaceCard = Color(0xFF0D0D0D)
-val DeepNightSurfaceVariant = Color(0xFF1A1A1A)
-val DeepNightPrimary = Color(0xFFFFC400)
+// --- Dark Purple Theme Colors (Тёмно-фиолетовый стиль) ---
+val DarkPurpleBackground = Color(0xFF0E0919)
+val DarkPurpleSurfaceCard = Color(0xFF171026)
+val DarkPurpleSurfaceVariant = Color(0xFF231838)
+val DarkPurplePrimary = Color(0xFFBB86FC)
+val DarkPurpleSecondary = Color(0xFF9965F4)
+val DarkPurpleGlassBackground = Color(0xEE140D24)
+val DarkPurpleGlassBorder = Color(0x33BB86FC)
+
+// Backward-compatible aliases
+val DeepNightBackground = DarkPurpleBackground
+val DeepNightSurfaceCard = DarkPurpleSurfaceCard
+val DeepNightSurfaceVariant = DarkPurpleSurfaceVariant
+val DeepNightPrimary = DarkPurplePrimary
